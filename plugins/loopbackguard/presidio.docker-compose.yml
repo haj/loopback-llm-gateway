@@ -1,0 +1,30 @@
+# Stand up the Presidio analyzer sidecar for loopbackguard's Presidio connector.
+#
+#   docker compose -f plugins/loopbackguard/presidio.docker-compose.yml up -d
+#
+# Then point the connector at it:
+#   loopbackguard.NewPlugin().WithTransformers(
+#       loopbackguard.NewPresidioClient("http://localhost:5002"))
+#
+# Microsoft Presidio is open source (MIT). The analyzer container listens on
+# port 3000; we publish it on host port 5002.
+services:
+  presidio-analyzer:
+    image: mcr.microsoft.com/presidio-analyzer:latest
+    ports:
+      - "5002:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Optional: the anonymizer service. The loopbackguard connector masks spans
+  # locally in Go, so this is not required — included for users who prefer
+  # Presidio's own operators (mask/hash/encrypt).
+  presidio-anonymizer:
+    image: mcr.microsoft.com/presidio-anonymizer:latest
+    ports:
+      - "5001:3000"
+    restart: unless-stopped

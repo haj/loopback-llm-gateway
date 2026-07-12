@@ -1,0 +1,56 @@
+{
+  "feature": "pii-config: PII Redactor Rules UI over existing redact.go (regex rules) + presidio.go (connector)",
+  "filesToCreate": [
+    "/home/hassan-ajan/Projects/loopback-gateway/framework/configstore/tables/pii_rule.go",
+    "/home/hassan-ajan/Projects/loopback-gateway/framework/configstore/store_pii_rules.go",
+    "/home/hassan-ajan/Projects/loopback-gateway/ui/lib/types/piiRules.ts",
+    "/home/hassan-ajan/Projects/loopback-gateway/ui/lib/store/apis/piiRulesApi.ts",
+    "/home/hassan-ajan/Projects/loopback-gateway/ui/app/workspace/pii-redactor/rules/page.tsx",
+    "/home/hassan-ajan/Projects/loopback-gateway/ui/app/workspace/pii-redactor/rules/views/piiRulesTable.tsx",
+    "/home/hassan-ajan/Projects/loopback-gateway/ui/app/workspace/pii-redactor/rules/views/piiRuleSheet.tsx"
+  ],
+  "filesToEdit": [
+    "/home/hassan-ajan/Projects/loopback-gateway/framework/configstore/migrations.go",
+    "/home/hassan-ajan/Projects/loopback-gateway/framework/configstore/configstore.go (or rdb.go)",
+    "/home/hassan-ajan/Projects/loopback-gateway/transports/bifrost-http/handlers/governance.go",
+    "/home/hassan-ajan/Projects/loopback-gateway/transports/bifrost-http/handlers/init.go",
+    "/home/hassan-ajan/Projects/loopback-gateway/plugins/loopbackguard/main.go",
+    "/home/hassan-ajan/Projects/loopback-gateway/ui/lib/store/apis/index.ts",
+    "/home/hassan-ajan/Projects/loopback-gateway/ui/app/_fallbacks/enterprise/components/pii-redactor/piiRedactorRulesView.tsx"
+  ],
+  "apiContract": "{\n  \"PII Rule Model\": {\n    \"id\": \"uuid\",\n    \"name\": \"string (user-friendly name)\",\n    \"description\": \"string (optional)\",\n    \"type\": \"enum: 'regex' | 'presidio'\",\n    \"enabled\": \"boolean (enable/disable without deletion)\",\n    \"scope\": \"enum: 'global' (all VKs) | 'virtual_key' (specific VK) | 'provider' (optional future)\",\n    \"scope_id\": \"string (optional, VK ID when scope='virtual_key')\",\n    \"regex_pattern\": \"string (when type='regex', required)\",\n    \"regex_replacement\": \"string (when type='regex', default: '[REDACTED]')\",\n    \"presidio_entity_type\": \"string (when type='presidio', e.g. 'PERSON', 'EMAIL')\",\n    \"presidio_score_threshold\": \"float64 (when type='presidio', 0-1, default: 0.5)\",\n    \"order\": \"int (execution order, lower runs first)\",\n    \"created_at\": \"timestamp\",\n    \"updated_at\": \"timestamp\"\n  },\n  \"CRUD Endpoints\": {\n    \"GET /api/governance/pii-rules\": \"List with pagination, scope filtering, search by name\",\n    \"POST /api/governance/pii-rules\": \"Create new rule\",\n    \"GET /api/governance/pii-rules/{id}\": \"Fetch single rule\",\n    \"PUT /api/governance/pii-rules/{id}\": \"Update rule (name, description, enabled, order, pattern/entity config)\",\n    \"DELETE /api/governance/pii-rules/{id}\": \"Soft or hard delete\",\n    \"POST /api/governance/pii-rules/{id}/test\": \"Test a regex pattern against sample text (POST with {text: string})\"\n  }\n}",
+  "steps": [
+    "Create TablePIIRule model in /framework/configstore/tables/pii_rule.go with GORM tags; use gorm.io/gorm for CASCADE, include discriminator fields for regex (pattern, replacement) vs presidio (entity_type, score_threshold)",
+    "Add migration in migrations.go: register in configstoreMigrationSteps array, create migrationAddPIIRulesTable() function following migrationAddVirtualKeyMCPConfigsTable pattern at /framework/configstore/migrations.go:~285",
+    "Implement configstore methods in new file store_pii_rules.go (mirror VirtualKey patterns): CreatePIIRule, GetPIIRule, GetPIIRules, UpdatePIIRule, DeletePIIRule, ListPIIRules\u2014call h.governanceManager.ReloadPIIRules(ctx) after mutations",
+    "Wire govenanceManager callback: add ReloadPIIRules and RemovePIIRule to GovernanceManager interface in /transports/bifrost-http/handlers/governance.go:46-62, implement in the in-memory governance data struct",
+    "Add HTTP CRUD handlers in /transports/bifrost-http/handlers/governance.go following createVirtualKey pattern (1238+): createPIIRule, getPIIRules, getPIIRule, updatePIIRule, deletePIIRule, with request/response DTOs, validation, error handling",
+    "Register routes in GovernanceHandler.RegisterRoutes() at /transports/bifrost-http/handlers/governance.go:963 under new 'PII Rules CRUD' section before line 1025",
+    "Add TypeScript types in /ui/lib/types/piiRules.ts (mirror governance.ts structure): PIIRule, CreatePIIRuleRequest, UpdatePIIRuleRequest, GetPIIRulesResponse, GetPIIRulesParams",
+    "Create RTK query API slice in /ui/lib/store/apis/piiRulesApi.ts extending baseApi with endpoints: getPIIRules (query), createPIIRule, updatePIIRule, deletePIIRule (mutations), with pessimistic cache updates",
+    "Export piiRulesApi from /ui/lib/store/apis/index.ts",
+    "Create frontend page at /ui/app/workspace/pii-redactor/rules/page.tsx with useGetPIIRulesQuery hook (pagination, filtering by scope)",
+    "Create table component at /ui/app/workspace/pii-redactor/rules/views/piiRulesTable.tsx with columns: name, type (badge: regex|presidio), pattern/entity-type preview, enabled toggle, order, actions",
+    "Create sheet component (create/edit) at /ui/app/workspace/pii-redactor/rules/views/piiRuleSheet.tsx with conditional fields based on type discriminator, include regex test button",
+    "Update loopbackguard plugin in /plugins/loopbackguard/main.go: add LoadPIIRules() method to Plugin struct that fetches rules from configstore, dynamically builds Redactor + PresidioClient from DB rules instead of hardcoded defaults",
+    "Call LoadPIIRules in PreRequestHook after governance manager ReloadPIIRules (hook pattern: governanceManager broadcasts change \u2192 plugin reloads rules in-memory for next request)",
+    "Replace stub at /ui/app/_fallbacks/enterprise/components/pii-redactor/piiRedactorRulesView.tsx to render the actual PiiRedactorRulesPage component instead of ContactUsView"
+  ],
+  "risks": "[\n  \"Regex injection/DoS: Validate regex patterns with timeout, cache compiled regexes, reject overly complex patterns (max length 1000 chars, max groups limit)\",\n  \"Presidio connector availability: Plugin already has fail-open semantics but ensure rules gracefully handle missing Presidio service (test with unavailable endpoint)\",\n  \"Rule ordering conflicts: Multiple rules matching same text\u2014execution order matters; add UI warning when regex patterns overlap, document first-match-wins semantics\",\n  \"Performance degradation: Per-request rule evaluation on every message; cache compiled regexes in Plugin, use sync.Pool for rune slices in maskEntities (avoid alloc churn)\",\n  \"Scope isolation: VK-scoped rules must not leak to other VKs; verify ScopeID matching in the plugin's rule-selection logic (getApplicableRules(scopeID))\",\n  \"Migration safety: Test on live data (large msg volumes) to ensure rule compilation does not block startup; if Presidio config fails, plugin should not crash on init\",\n  \"Backward compat: Old config files reference hardcoded DefaultPIIRules\u2014keep default rules in DB seed or lazy-init if no rules exist (graceful degradation)\"\n]",
+  "patternsToFollow": [
+    "/home/hassan-ajan/Projects/loopback-gateway/framework/configstore/tables/virtualkey.go (table struct with gorm tags, relationships, validation hooks)",
+    "/home/hassan-ajan/Projects/loopback-gateway/framework/configstore/migrations.go:~285 (migrationAddVirtualKeyMCPConfigsTable function template for new migration)",
+    "/home/hassan-ajan/Projects/loopback-gateway/transports/bifrost-http/handlers/governance.go:1238-1437 (createVirtualKey handler: request parsing, validation, transaction, error handling, response hydration)",
+    "/home/hassan-ajan/Projects/loopback-gateway/transports/bifrost-http/handlers/governance.go:963-1023 (RegisterRoutes pattern with lib.ChainMiddlewares)",
+    "/home/hassan-ajan/Projects/loopback-gateway/ui/lib/types/governance.ts (TypeScript interface pattern with optional fields, request DTOs)",
+    "/home/hassan-ajan/Projects/loopback-gateway/ui/lib/store/apis/governanceApi.ts (RTK query endpoints with pessimistic cache updates, invalidatesTags)",
+    "/home/hassan-ajan/Projects/loopback-gateway/ui/app/workspace/virtual-keys/views/virtualKeysTable.tsx (data table with search, pagination, filters, sheet integration)"
+  ],
+  "backendEndpoints": [
+    "/home/hassan-ajan/Projects/loopback-gateway/plugins/loopbackguard/redact.go:47-55 (DefaultPIIRules source of truth for regex patterns)",
+    "/home/hassan-ajan/Projects/loopback-gateway/plugins/loopbackguard/presidio.go:37-54 (PresidioClient initialization, score_threshold, language config)",
+    "/home/hassan-ajan/Projects/loopback-gateway/plugins/loopbackguard/main.go:145-158 (PreRequestHook integration point where redactor + transformers run)",
+    "/home/hassan-ajan/Projects/loopback-gateway/framework/configstore/configstore.go (ConfigStore interface where Get/Create/Update/Delete methods live)"
+  ],
+  "loopbackguardWiring": "{\n  \"Plugin Initialization\": \"loopbackguard.Plugin is instantiated in bifrost-http/server/plugins.go's loadBuiltinPlugin() or as custom plugin; config may come from DB or static config\",\n  \"Rule Loading Hook\": \"Add GovernanceManager callback ReloadPIIRules(ctx) \u2192 Plugin.LoadPIIRules() loads all enabled rules from configstore, rebuilds Redactor (regex) and PresidioClient(entity) in-memory\",\n  \"Execution Path\": \"BifrostRequest \u2192 PreRequestHook \u2192 p.applyTransformers (PresidioClient) \u2192 p.redactor (Redactor) for message text mutation before provider call\",\n  \"Scope Filtering\": \"In Plugin.LoadPIIRules(), filter rules by scope (global + VK-scoped rules for this VK's ID extracted from request context); merge into ordered rule list\",\n  \"Config Broadcast\": \"When rule CRUD mutation completes in HTTP handler, call governanceManager.ReloadPIIRules(ctx) to notify plugin; plugin reloads for next request (eventual consistency, not strict)\"\n}"
+}

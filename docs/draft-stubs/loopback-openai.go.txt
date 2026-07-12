@@ -1,0 +1,127 @@
+// Package loopback-openai provides a unified OpenAI provider implementation
+// for the Loopback Gateway with enhanced features from Portkey and LiteLLM.
+package loopbackopenai
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+
+	"github.com/bytedance/sonic"
+	
+	providerUtils "github.com/maximhq/bifrost/core/providers/utils"
+	schemas "github.com/maximhq/bifrost/core/schemas"
+	"github.com/valyala/fasthttp"
+)
+
+// LoopbackOpenAIProvider extends OpenAI provider with:
+// - Enhanced error handling from Portkey
+// - Streaming support from LiteLLM
+// - Custom provider configuration
+type LoopbackOpenAIProvider struct {
+	*OpenAIProvider
+	config *schemas.ProviderConfig
+	logger schemas.Logger
+}
+
+// NewLoopbackOpenAIProvider creates a new Loopback OpenAI provider
+func NewLoopbackOpenAIProvider(config *schemas.ProviderConfig, logger schemas.Logger) *LoopbackOpenAIProvider {
+	baseProvider := NewOpenAIProvider(config, logger)
+	
+	return &LoopbackOpenAIProvider{
+		OpenAIProvider: baseProvider,
+		config:         config,
+		logger:         logger,
+	}
+}
+
+// GetProviderKey returns the provider identifier
+func (provider *LoopbackOpenAIProvider) GetProviderKey() schemas.ModelProvider {
+	return schemas.ModelProvider("loopback-openai")
+}
+
+// HandleRequest handles incoming requests with enhanced error handling
+func (provider *LoopbackOpenAIProvider) HandleRequest(
+	ctx *schemas.BifrostContext,
+	request *schemas.BifrostRequest,
+) (*schemas.BifrostResponse, *schemas.BifrostError) {
+	// Add Portkey-style error handling
+	resp, err := provider.OpenAIProvider.HandleRequest(ctx, request)
+	if err != nil {
+		return provider.enhanceError(ctx, err)
+	}
+	return resp, nil
+}
+
+// enhanceError adds Portkey-style error enrichment
+func (provider *LoopbackOpenAIProvider) enhanceError(
+	ctx *schemas.BifrostContext,
+	err *schemas.BifrostError,
+) (*schemas.BifrostResponse, *schemas.BifrostError) {
+	// Add error metadata from Portkey
+	if err.StatusCode == 0 {
+		err.StatusCode = http.StatusInternalServerError
+	}
+	
+	// Add retry hint if applicable
+	if err.StatusCode >= 500 {
+		err.Retryable = true
+		err.RetryAfter = time.Second * 2
+	}
+	
+	return nil, err
+}
+
+// StreamRequest handles streaming requests from LiteLLM
+func (provider *LoopbackOpenAIProvider) StreamRequest(
+	ctx *schemas.BifrostContext,
+	request *schemas.BifrostRequest,
+) (<-chan *schemas.BifrostStreamChunk, <-chan *schemas.BifrostError) {
+	// Implementation for streaming support
+	streamChan := make(chan *schemas.BifrostStreamChunk, 100)
+	errChan := make(chan *schemas.BifrostError, 1)
+	
+	go func() {
+		defer close(streamChan)
+		defer close(errChan)
+		
+		// Stream handling logic
+		for chunk := range provider.StreamingClient {
+			streamChan <- chunk
+		}
+	}()
+	
+	return streamChan, errChan
+}
+
+// ValidateRequest validates incoming requests
+func (provider *LoopbackOpenAIProvider) ValidateRequest(
+	ctx *schemas.BifrostContext,
+	request *schemas.BifrostRequest,
+) *schemas.BifrostError {
+	// Add validation from Portkey guardrails
+	if request.Input == nil || len(request.Input) == 0 {
+		return &schemas.BifrostError{
+			StatusCode: 400,
+			Code:       schemas.ErrInvalidRequest,
+			Message:    "Input is required",
+		}
+	}
+	
+	return nil
+}
+
+// ToBifrostResponse converts response
+func (provider *LoopbackOpenAIProvider) ToBifrostResponse(
+	resp *fasthttp.Response,
+) (*schemas.BifrostResponse, error) {
+	// Conversion logic
+	return nil, nil
+}

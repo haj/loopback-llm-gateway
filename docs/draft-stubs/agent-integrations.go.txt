@@ -1,0 +1,392 @@
+// Package agents provides agent framework integrations for the Loopback Gateway
+package agents
+
+import (
+	"context"
+	"fmt"
+	"sync"
+	"time"
+
+	"github.com/maximhq/bifrost/core/schemas"
+)
+
+// AgentFramework represents an agent framework integration
+type AgentFramework struct {
+	Name        string
+	Version     string
+	Description string
+	Enabled     bool
+	Handlers    map[string]AgentHandler
+	Metadata    map[string]string
+}
+
+// AgentHandler is a function that handles agent requests
+type AgentHandler func(ctx context.Context, request *schemas.BifrostChatRequest) (*schemas.BifrostChatResponse, error)
+
+// AgentContext represents the context for agent operations
+type AgentContext struct {
+	RequestID     string
+	Framework     string
+	AgentID       string
+	Timestamp     time.Time
+	Metadata      map[string]string
+	TraceID       string
+	ParentSpanID  string
+}
+
+// AgentResponse represents the response from an agent framework
+type AgentResponse struct {
+	Success       bool
+	Message       string
+	Data          interface{}
+	Error         error
+	Timestamp     time.Time
+	LatencyMs     float64
+	TraceID       string
+}
+
+// AgentRegistry manages all agent framework integrations
+type AgentRegistry struct {
+	frameworks map[string]*AgentFramework
+	mu         sync.RWMutex
+}
+
+// NewAgentRegistry creates a new agent registry
+func NewAgentRegistry() *AgentRegistry {
+	return &AgentRegistry{
+		frameworks: make(map[string]*AgentFramework),
+	}
+}
+
+// RegisterFramework registers a new agent framework
+func (ar *AgentRegistry) RegisterFramework(fw *AgentFramework) error {
+	ar.mu.Lock()
+	defer ar.mu.Unlock()
+
+	ar.frameworks[fw.Name] = fw
+	return nil
+}
+
+// GetFramework returns a registered framework
+func (ar *AgentRegistry) GetFramework(name string) (*AgentFramework, error) {
+	ar.mu.RLock()
+	defer ar.mu.RUnlock()
+
+	fw, ok := ar.frameworks[name]
+	if !ok {
+		return nil, fmt.Errorf("agent framework not found: %s", name)
+	}
+
+	return fw, nil
+}
+
+// EnableFramework enables an agent framework
+func (ar *AgentRegistry) EnableFramework(name string) error {
+	ar.mu.Lock()
+	defer ar.mu.Unlock()
+
+	fw, ok := ar.frameworks[name]
+	if !ok {
+		return fmt.Errorf("agent framework not found: %s", name)
+	}
+
+	fw.Enabled = true
+	return nil
+}
+
+// DisableFramework disables an agent framework
+func (ar *AgentRegistry) DisableFramework(name string) error {
+	ar.mu.Lock()
+	defer ar.mu.Unlock()
+
+	fw, ok := ar.frameworks[name]
+	if !ok {
+		return fmt.Errorf("agent framework not found: %s", name)
+	}
+
+	fw.Enabled = false
+	return nil
+}
+
+// HandleRequest handles a request using the specified agent framework
+func (ar *AgentRegistry) HandleRequest(ctx context.Context, framework string, request *schemas.BifrostChatRequest) (*AgentResponse, error) {
+	ar.mu.RLock()
+	fw, ok := ar.frameworks[framework]
+	ar.mu.RUnlock()
+
+	if !ok {
+		return nil, fmt.Errorf("agent framework not found: %s", framework)
+	}
+
+	if !fw.Enabled {
+		return nil, fmt.Errorf("agent framework not enabled: %s", framework)
+	}
+
+	startTime := time.Now()
+
+	response, err := fw.Handlers["default"](ctx, request)
+	latency := time.Since(startTime).Milliseconds()
+
+	return &AgentResponse{
+		Success:  err == nil,
+		Message:  "Request processed",
+		Data:     response,
+		Error:    err,
+		Timestamp: time.Now(),
+		LatencyMs: float64(latency),
+	}, err
+}
+
+// GlobalAgentRegistry is the global agent registry instance
+var GlobalAgentRegistry = NewAgentRegistry()
+
+// GetGlobalAgentRegistry returns the global agent registry
+func GetGlobalAgentRegistry() *AgentRegistry {
+	return GlobalAgentRegistry
+}
+
+// InitializeAgentRegistry initializes the global agent registry with default frameworks
+func InitializeAgentRegistry() error {
+	frameworks := []struct {
+		name        string
+		description string
+		handler     AgentHandler
+	}{
+		{
+			name:        "autogen",
+			description: "Microsoft AutoGen framework integration",
+			handler:     autogenHandler,
+		},
+		{
+			name:        "crewai",
+			description: "CrewAI framework integration",
+			handler:     crewaiHandler,
+		},
+		{
+			name:        "langchain",
+			description: "LangChain framework integration",
+			handler:     langchainHandler,
+		},
+		{
+			name:        "llamaindex",
+			description: "LlamaIndex framework integration",
+			handler:     llamaindexHandler,
+		},
+		{
+			name:        "phidata",
+			description: "Phidata framework integration",
+			handler:     phidataHandler,
+		},
+		{
+			name:        "controlflow",
+			description: "ControlFlow framework integration",
+			handler:     controlflowHandler,
+		},
+	}
+
+	for _, fw := range frameworks {
+		err := GlobalAgentRegistry.RegisterFramework(&AgentFramework{
+			Name:        fw.name,
+			Version:     "1.0.0",
+			Description: fw.description,
+			Enabled:     true,
+			Handlers: map[string]AgentHandler{
+				"default": fw.handler,
+			},
+			Metadata: map[string]string{
+				"integration_type": "gateway",
+			},
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// autogenHandler handles AutoGen requests
+func autogenHandler(ctx context.Context, request *schemas.BifrostChatRequest) (*schemas.BifrostChatResponse, error) {
+	// AutoGen integration would go here
+	response := &schemas.BifrostChatResponse{
+		ID:      fmt.Sprintf("autogen-%s", time.Now().Format("20060102150405")),
+		Object:  "chat.completion",
+		Created: time.Now().Unix(),
+		Choices: []schemas.Choice{
+			{
+				Index:        0,
+				Message:      schemas.Message{Role: "assistant", Content: request.Messages[0].Content},
+				FinishReason: "stop",
+			},
+		},
+	}
+
+	return response, nil
+}
+
+// crewaiHandler handles CrewAI requests
+func crewaiHandler(ctx context.Context, request *schemas.BifrostChatRequest) (*schemas.BifrostChatResponse, error) {
+	// CrewAI integration would go here
+	response := &schemas.BifrostChatResponse{
+		ID:      fmt.Sprintf("crewai-%s", time.Now().Format("20060102150405")),
+		Object:  "chat.completion",
+		Created: time.Now().Unix(),
+		Choices: []schemas.Choice{
+			{
+				Index:        0,
+				Message:      schemas.Message{Role: "assistant", Content: request.Messages[0].Content},
+				FinishReason: "stop",
+			},
+		},
+	}
+
+	return response, nil
+}
+
+// langchainHandler handles LangChain requests
+func langchainHandler(ctx context.Context, request *schemas.BifrostChatRequest) (*schemas.BifrostChatResponse, error) {
+	// LangChain integration would go here
+	response := &schemas.BifrostChatResponse{
+		ID:      fmt.Sprintf("langchain-%s", time.Now().Format("20060102150405")),
+		Object:  "chat.completion",
+		Created: time.Now().Unix(),
+		Choices: []schemas.Choice{
+			{
+				Index:        0,
+				Message:      schemas.Message{Role: "assistant", Content: request.Messages[0].Content},
+				FinishReason: "stop",
+			},
+		},
+	}
+
+	return response, nil
+}
+
+// llamaindexHandler handles LlamaIndex requests
+func llamaindexHandler(ctx context.Context, request *schemas.BifrostChatRequest) (*schemas.BifrostChatResponse, error) {
+	// LlamaIndex integration would go here
+	response := &schemas.BifrostChatResponse{
+		ID:      fmt.Sprintf("llamaindex-%s", time.Now().Format("20060102150405")),
+		Object:  "chat.completion",
+		Created: time.Now().Unix(),
+		Choices: []schemas.Choice{
+			{
+				Index:        0,
+				Message:      schemas.Message{Role: "assistant", Content: request.Messages[0].Content},
+				FinishReason: "stop",
+			},
+		},
+	}
+
+	return response, nil
+}
+
+// phidataHandler handles Phidata requests
+func phidataHandler(ctx context.Context, request *schemas.BifrostChatRequest) (*schemas.BifrostChatResponse, error) {
+	// Phidata integration would go here
+	response := &schemas.BifrostChatResponse{
+		ID:      fmt.Sprintf("phidata-%s", time.Now().Format("20060102150405")),
+		Object:  "chat.completion",
+		Created: time.Now().Unix(),
+		Choices: []schemas.Choice{
+			{
+				Index:        0,
+				Message:      schemas.Message{Role: "assistant", Content: request.Messages[0].Content},
+				FinishReason: "stop",
+			},
+		},
+	}
+
+	return response, nil
+}
+
+// controlflowHandler handles ControlFlow requests
+func controlflowHandler(ctx context.Context, request *schemas.BifrostChatRequest) (*schemas.BifrostChatResponse, error) {
+	// ControlFlow integration would go here
+	response := &schemas.BifrostChatResponse{
+		ID:      fmt.Sprintf("controlflow-%s", time.Now().Format("20060102150405")),
+		Object:  "chat.completion",
+		Created: time.Now().Unix(),
+		Choices: []schemas.Choice{
+			{
+				Index:        0,
+				Message:      schemas.Message{Role: "assistant", Content: request.Messages[0].Content},
+				FinishReason: "stop",
+			},
+		},
+	}
+
+	return response, nil
+}
+
+// AgentMiddleware is a middleware for agent framework integration
+type AgentMiddleware struct {
+	registry *AgentRegistry
+}
+
+// NewAgentMiddleware creates a new agent middleware
+func NewAgentMiddleware() *AgentMiddleware {
+	return &AgentMiddleware{
+		registry: GlobalAgentRegistry,
+	}
+}
+
+// ProcessRequest processes a request through the agent middleware
+func (am *AgentMiddleware) ProcessRequest(ctx context.Context, request *schemas.BifrostChatRequest) (*AgentResponse, error) {
+	// Check if request is for an agent framework
+	if agentFramework := extractAgentFramework(request); agentFramework != "" {
+		return am.registry.HandleRequest(ctx, agentFramework, request)
+	}
+
+	// No agent framework specified, return nil to continue normal processing
+	return nil, nil
+}
+
+// extractAgentFramework extracts the agent framework from a request
+func extractAgentFramework(request *schemas.BifrostChatRequest) string {
+	// Check for agent framework in request metadata or headers
+	// This is a placeholder implementation
+	return ""
+}
+
+// AgentConfig contains agent framework configuration
+type AgentConfig struct {
+	Enabled       bool
+	Frameworks    []string
+	DefaultFramework string
+	Timeout       time.Duration
+	RetryCount    int
+}
+
+// DefaultAgentConfig returns the default agent configuration
+func DefaultAgentConfig() *AgentConfig {
+	return &AgentConfig{
+		Enabled:          true,
+		Frameworks:       []string{"autogen", "crewai", "langchain", "llamaindex", "phidata", "controlflow"},
+		DefaultFramework: "langchain",
+		Timeout:          30 * time.Second,
+		RetryCount:       3,
+	}
+}
+
+// AgentStats contains usage statistics for agent frameworks
+type AgentStats struct {
+	Framework      string
+	RequestCount   int64
+	SuccessCount   int64
+	ErrorCount     int64
+	AvgLatencyMs   float64
+	LastRequest    time.Time
+}
+
+// AddRequest adds a request to the stats
+func (as *AgentStats) AddRequest(latency time.Duration, isSuccess bool) {
+	as.RequestCount++
+	if isSuccess {
+		as.SuccessCount++
+	} else {
+		as.ErrorCount++
+	}
+	as.LastRequest = time.Now()
+	as.AvgLatencyMs = (as.AvgLatencyMs*float64(as.RequestCount-1) + float64(latency.Milliseconds())) / float64(as.RequestCount)
+}

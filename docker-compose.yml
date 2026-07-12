@@ -1,0 +1,62 @@
+# Loopback Gateway — local/self-hosted stack.
+#
+#   docker compose up --build gateway          # gateway only (UI is embedded)
+#   docker compose --profile full up --build   # gateway + redis + postgres
+#
+# The gateway serves the admin UI and API on port 8080.
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: transports/Dockerfile
+    container_name: loopback-gateway
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - loopback-data:/app/data
+    restart: unless-stopped
+    networks:
+      - loopback-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: loopback-redis
+    profiles: ["full"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    networks:
+      - loopback-network
+
+  # PostgreSQL for config/log storage (optional)
+  postgres:
+    image: postgres:16-alpine
+    container_name: loopback-postgres
+    profiles: ["full"]
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-loopback}
+      # Local development default — set POSTGRES_PASSWORD in your environment or a .env file for any shared or production deployment.
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-loopback-dev-only}
+      - POSTGRES_DB=${POSTGRES_DB:-loopback}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - loopback-network
+
+volumes:
+  loopback-data:
+  redis-data:
+  postgres-data:
+
+networks:
+  loopback-network:
+    driver: bridge

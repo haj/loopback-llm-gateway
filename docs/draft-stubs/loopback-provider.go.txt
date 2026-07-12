@@ -1,0 +1,537 @@
+// Package loopbackproviders provides unified provider implementations
+// combining Bifrost, Portkey, and LiteLLM capabilities.
+package loopbackproviders
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/maximhq/bifrost/core/schemas"
+	"github.com/maximhq/bifrost/core/providers/utils"
+	"github.com/valyala/fasthttp"
+)
+
+// LoopbackProvider wraps a base provider with additional features
+type LoopbackProvider struct {
+	provider     schemas.Provider
+	guardrails   []Guardrail
+	agentHooks   []AgentHook
+	metadata     ProviderMetadata
+}
+
+// ProviderMetadata contains additional provider information
+type ProviderMetadata struct {
+	Name           string
+	Description    string
+	BaseProvider   schemas.ModelProvider
+	Capabilities   []string
+	IsAdapter      bool
+	AdapterType    string
+	Enabled        bool
+	LastUpdated    time.Time
+}
+
+// Guardrail represents a security/quality guardrail
+type Guardrail struct {
+	Name        string
+	Description string
+	Type        GuardrailType
+	Enabled     bool
+	Config      map[string]interface{}
+}
+
+// GuardrailType represents the type of guardrail
+type GuardrailType string
+
+const (
+	GuardrailTypeHate        GuardrailType = "hate"
+	GuardrailTypeViolence    GuardrailType = "violence"
+	GuardrailTypeSelfHarm    GuardrailType = "self_harm"
+	GuardrailTypeSexual      GuardrailType = "sexual"
+	GuardrailTypePIIDetect   GuardrailType = "pii_detect"
+	GuardrailTypePIIRedact   GuardrailType = "pii_redact"
+	GuardrailTypeLanguage    GuardrailType = "language"
+	GuardrailTypeGibberish   GuardrailType = "gibberish"
+	GuardrailTypeCustom      GuardrailType = "custom"
+)
+
+// AgentHook represents an agent framework integration
+type AgentHook struct {
+	Name        string
+	Framework   string
+	Enabled     bool
+	Handlers    map[string]AgentHandler
+}
+
+// AgentHandler represents a specific agent handler function
+type AgentHandler func(ctx context.Context, request *schemas.BifrostChatRequest) (*schemas.BifrostChatResponse, error)
+
+// NewLoopbackProvider creates a new loopback provider with optional guardrails
+func NewLoopbackProvider(baseProvider schemas.Provider, opts ...ProviderOption) *LoopbackProvider {
+	lp := &LoopbackProvider{
+		provider: baseProvider,
+		metadata: ProviderMetadata{
+			Name:         fmt.Sprintf("loopback-%s", strings.ToLower(string(baseProvider.GetProviderKey()))),
+			Description:  fmt.Sprintf("Enhanced %s provider with guardrails and agent support", baseProvider.GetProviderKey()),
+			BaseProvider: baseProvider.GetProviderKey(),
+			Capabilities: []string{"guardrails", "agents", "analytics"},
+			IsAdapter:    false,
+			Enabled:      true,
+			LastUpdated:  time.Now(),
+		},
+	}
+
+	for _, opt := range opts {
+		opt(lp)
+	}
+
+	return lp
+}
+
+// ProviderOption configures a loopback provider
+type ProviderOption func(*LoopbackProvider)
+
+// WithGuardrails adds guardrails to the provider
+func WithGuardrails(guardrails []Guardrail) ProviderOption {
+	return func(lp *LoopbackProvider) {
+		lp.guardrails = guardrails
+	}
+}
+
+// WithAgentHooks adds agent framework integrations
+func WithAgentHooks(hooks []AgentHook) ProviderOption {
+	return func(lp *LoopbackProvider) {
+		lp.agentHooks = hooks
+	}
+}
+
+// WithMetadata sets custom metadata
+func WithMetadata(metadata ProviderMetadata) ProviderOption {
+	return func(lp *LoopbackProvider) {
+		lp.metadata = metadata
+	}
+}
+
+// GetProviderKey returns the provider's identifier
+func (lp *LoopbackProvider) GetProviderKey() schemas.ModelProvider {
+	return lp.provider.GetProviderKey()
+}
+
+// ListModels performs a list models request
+func (lp *LoopbackProvider) ListModels(ctx *schemas.BifrostContext, keys []schemas.Key, request *schemas.BifrostListModelsRequest) (*schemas.BifrostListModelsResponse, *schemas.BifrostError) {
+	return lp.provider.ListModels(ctx, keys, request)
+}
+
+// TextCompletion performs a text completion request
+func (lp *LoopbackProvider) TextCompletion(ctx *schemas.BifrostContext, key schemas.Key, request *schemas.BifrostTextCompletionRequest) (*schemas.BifrostTextCompletionResponse, *schemas.BifrostError) {
+	if !lp.checkGuardrails(request) {
+		return nil, schemas.NewBifrostError(schemas.ErrorCodeGuardrail, "Request blocked by guardrail", nil)
+	}
+	return lp.provider.TextCompletion(ctx, key, request)
+}
+
+// TextCompletionStream performs a text completion stream request
+func (lp *LoopbackProvider) TextCompletionStream(ctx *schemas.BifrostContext, postHookRunner schemas.PostHookRunner, postHookSpanFinalizer func(context.Context), key schemas.Key, request *schemas.BifrostTextCompletionRequest) (chan *schemas.BifrostStreamChunk, *schemas.BifrostError) {
+	if !lp.checkGuardrails(request) {
+		return nil, schemas.NewBifrostError(schemas.ErrorCodeGuardrail, "Request blocked by guardrail", nil)
+	}
+	return lp.provider.TextCompletionStream(ctx, postHookRunner, postHookSpanFinalizer, key, request)
+}
+
+// ChatCompletion performs a chat completion request
+func (lp *LoopbackProvider) ChatCompletion(ctx *schemas.BifrostContext, key schemas.Key, request *schemas.BifrostChatRequest) (*schemas.BifrostChatResponse, *schemas.BifrostError) {
+	if !lp.checkGuardrails(request) {
+		return nil, schemas.NewBifrostError(schemas.ErrorCodeGuardrail, "Request blocked by guardrail", nil)
+	}
+	return lp.provider.ChatCompletion(ctx, key, request)
+}
+
+// ChatCompletionStream performs a chat completion stream request
+func (lp *LoopbackProvider) ChatCompletionStream(ctx *schemas.BifrostContext, postHookRunner schemas.PostHookRunner, postHookSpanFinalizer func(context.Context), key schemas.Key, request *schemas.BifrostChatRequest) (chan *schemas.BifrostStreamChunk, *schemas.BifrostError) {
+	if !lp.checkGuardrails(request) {
+		return nil, schemas.NewBifrostError(schemas.ErrorCodeGuardrail, "Request blocked by guardrail", nil)
+	}
+	return lp.provider.ChatCompletionStream(ctx, postHookRunner, postHookSpanFinalizer, key, request)
+}
+
+// Responses performs a responses API request
+func (lp *LoopbackProvider) Responses(ctx *schemas.BifrostContext, key schemas.Key, request *schemas.BifrostResponsesRequest) (*schemas.BifrostResponsesResponse, *schemas.BifrostError) {
+	if !lp.checkGuardrails(request) {
+		return nil, schemas.NewBifrostError(schemas.ErrorCodeGuardrail, "Request blocked by guardrail", nil)
+	}
+	return lp.provider.Responses(ctx, key, request)
+}
+
+// ResponsesStream performs a responses API stream request
+func (lp *LoopbackProvider) ResponsesStream(ctx *schemas.BifrostContext, postHookRunner schemas.PostHookRunner, postHookSpanFinalizer func(context.Context), key schemas.Key, request *schemas.BifrostResponsesRequest) (chan *schemas.BifrostStreamChunk, *schemas.BifrostError) {
+	if !lp.checkGuardrails(request) {
+		return nil, schemas.NewBifrostError(schemas.ErrorCodeGuardrail, "Request blocked by guardrail", nil)
+	}
+	return lp.provider.ResponsesStream(ctx, postHookRunner, postHookSpanFinalizer, key, request)
+}
+
+// Embedding performs an embedding request
+func (lp *LoopbackProvider) Embedding(ctx *schemas.BifrostContext, key schemas.Key, request *schemas.BifrostEmbeddingRequest) (*schemas.BifrostEmbeddingResponse, *schemas.BifrostError) {
+	return lp.provider.Embedding(ctx, key, request)
+}
+
+// ImageGeneration performs an image generation request
+func (lp *LoopbackProvider) ImageGeneration(ctx *schemas.BifrostContext, key schemas.Key, request *schemas.BifrostImageGenerationRequest) (*schemas.BifrostImageGenerationResponse, *schemas.BifrostError) {
+	if !lp.checkGuardrails(request) {
+		return nil, schemas.NewBifrostError(schemas.ErrorCodeGuardrail, "Request blocked by guardrail", nil)
+	}
+	return lp.provider.ImageGeneration(ctx, key, request)
+}
+
+// Passthrough executes a passthrough request
+func (lp *LoopbackProvider) Passthrough(ctx *schemas.BifrostContext, key schemas.Key, req *schemas.BifrostPassthroughRequest) (*schemas.BifrostPassthroughResponse, *schemas.BifrostError) {
+	return lp.provider.Passthrough(ctx, key, req)
+}
+
+// PassthroughStream executes a passthrough stream request
+func (lp *LoopbackProvider) PassthroughStream(ctx *schemas.BifrostContext, postHookRunner schemas.PostHookRunner, postHookSpanFinalizer func(context.Context), key schemas.Key, req *schemas.BifrostPassthroughRequest) (chan *schemas.BifrostStreamChunk, *schemas.BifrostError) {
+	return lp.provider.PassthroughStream(ctx, postHookRunner, postHookSpanFinalizer, key, req)
+}
+
+// checkGuardrails runs all enabled guardrails on the request
+func (lp *LoopbackProvider) checkGuardrails(request interface{}) bool {
+	for _, guardrail := range lp.guardrails {
+		if !guardrail.Enabled {
+			continue
+		}
+		if !lp.runGuardrail(guardrail, request) {
+			return false
+		}
+	}
+	return true
+}
+
+// runGuardrail executes a single guardrail
+func (lp *LoopbackProvider) runGuardrail(guardrail Guardrail, request interface{}) bool {
+	switch guardrail.Type {
+	case GuardrailTypeHate:
+		return lp.hateSpeechGuardrail(request)
+	case GuardrailTypeViolence:
+		return lp.violenceGuardrail(request)
+	case GuardrailTypeSelfHarm:
+		return lp.selfHarmGuardrail(request)
+	case GuardrailTypeSexual:
+		return lp.sexualContentGuardrail(request)
+	case GuardrailTypePIIDetect:
+		return lp.piiDetectGuardrail(request)
+	case GuardrailTypePIIRedact:
+		return lp.piiRedactGuardrail(request)
+	case GuardrailTypeGibberish:
+		return lp.gibberishGuardrail(request)
+	case GuardrailTypeCustom:
+		return lp.customGuardrail(guardrail, request)
+	default:
+		return true // pass if type not recognized
+	}
+}
+
+// hateSpeechGuardrail checks for hate speech
+func (lp *LoopbackProvider) hateSpeechGuardrail(request interface{}) bool {
+	// Implementation would check for hate speech in request
+	// For now, always pass (placeholder)
+	return true
+}
+
+// violenceGuardrail checks for violence content
+func (lp *LoopbackProvider) violenceGuardrail(request interface{}) bool {
+	// Implementation would check for violence content
+	// For now, always pass (placeholder)
+	return true
+}
+
+// selfHarmGuardrail checks for self-harm content
+func (lp *LoopbackProvider) selfHarmGuardrail(request interface{}) bool {
+	// Implementation would check for self-harm content
+	// For now, always pass (placeholder)
+	return true
+}
+
+// sexualContentGuardrail checks for sexual content
+func (lp *LoopbackProvider) sexualContentGuardrail(request interface{}) bool {
+	// Implementation would check for sexual content
+	// For now, always pass (placeholder)
+	return true
+}
+
+// piiDetectGuardrail checks for PII in requests
+func (lp *LoopbackProvider) piiDetectGuardrail(request interface{}) bool {
+	// Implementation would detect PII in request
+	// For now, always pass (placeholder)
+	return true
+}
+
+// piiRedactGuardrail redacts PII from responses
+func (lp *LoopbackProvider) piiRedactGuardrail(request interface{}) bool {
+	// Implementation would redact PII from response
+	// For now, always pass (placeholder)
+	return true
+}
+
+// gibberishGuardrail checks for gibberish content
+func (lp *LoopbackProvider) gibberishGuardrail(request interface{}) bool {
+	// Implementation would check for gibberish
+	// For now, always pass (placeholder)
+	return true
+}
+
+// customGuardrail runs a custom guardrail
+func (lp *LoopbackProvider) customGuardrail(guardrail Guardrail, request interface{}) bool {
+	// Implementation would run custom guardrail logic
+	// For now, always pass (placeholder)
+	return true
+}
+
+// LoopbackProviderManager manages all loopback providers
+type LoopbackProviderManager struct {
+	providers map[schemas.ModelProvider]*LoopbackProvider
+	mu        sync.RWMutex
+}
+
+// NewLoopbackProviderManager creates a new provider manager
+func NewLoopbackProviderManager() *LoopbackProviderManager {
+	return &LoopbackProviderManager{
+		providers: make(map[schemas.ModelProvider]*LoopbackProvider),
+	}
+}
+
+// RegisterProvider registers a new provider with optional guardrails
+func (pm *LoopbackProviderManager) RegisterProvider(provider schemas.Provider, opts ...ProviderOption) error {
+	pm.mu.Lock()
+	defer pm.mu.Unlock()
+
+	lp := NewLoopbackProvider(provider, opts...)
+	pm.providers[lp.GetProviderKey()] = lp
+
+	return nil
+}
+
+// GetProvider returns a registered provider
+func (pm *LoopbackProviderManager) GetProvider(key schemas.ModelProvider) (*LoopbackProvider, error) {
+	pm.mu.RLock()
+	defer pm.mu.RUnlock()
+
+	lp, ok := pm.providers[key]
+	if !ok {
+		return nil, fmt.Errorf("provider not found: %s", key)
+	}
+
+	return lp, nil
+}
+
+// ListProviders returns all registered providers
+func (pm *LoopbackProviderManager) ListProviders() []*LoopbackProvider {
+	pm.mu.RLock()
+	defer pm.mu.RUnlock()
+
+	providers := make([]*LoopbackProvider, 0, len(pm.providers))
+	for _, lp := range pm.providers {
+		providers = append(providers, lp)
+	}
+
+	return providers
+}
+
+// EnableProvider enables a provider
+func (pm *LoopbackProviderManager) EnableProvider(key schemas.ModelProvider) error {
+	pm.mu.Lock()
+	defer pm.mu.Unlock()
+
+	lp, ok := pm.providers[key]
+	if !ok {
+		return fmt.Errorf("provider not found: %s", key)
+	}
+
+	lp.metadata.Enabled = true
+	return nil
+}
+
+// DisableProvider disables a provider
+func (pm *LoopbackProviderManager) DisableProvider(key schemas.ModelProvider) error {
+	pm.mu.Lock()
+	defer pm.mu.Unlock()
+
+	lp, ok := pm.providers[key]
+	if !ok {
+		return fmt.Errorf("provider not found: %s", key)
+	}
+
+	lp.metadata.Enabled = false
+	return nil
+}
+
+// GetProviderMetadata returns metadata for a provider
+func (pm *LoopbackProviderManager) GetProviderMetadata(key schemas.ModelProvider) (*ProviderMetadata, error) {
+	pm.mu.RLock()
+	defer pm.mu.RUnlock()
+
+	lp, ok := pm.providers[key]
+	if !ok {
+		return nil, fmt.Errorf("provider not found: %s", key)
+	}
+
+	return &lp.metadata, nil
+}
+
+// GetProviderStats returns usage statistics for a provider
+func (pm *LoopbackProviderManager) GetProviderStats(key schemas.ModelProvider) (*ProviderStats, error) {
+	pm.mu.RLock()
+	defer pm.mu.RUnlock()
+
+	lp, ok := pm.providers[key]
+	if !ok {
+		return nil, fmt.Errorf("provider not found: %s", key)
+	}
+
+	return &ProviderStats{
+		ProviderKey:    key,
+		Enabled:        lp.metadata.Enabled,
+		GuardrailCount: len(lp.guardrails),
+		AgentHookCount: len(lp.agentHooks),
+	}, nil
+}
+
+// ProviderStats contains usage statistics for a provider
+type ProviderStats struct {
+	ProviderKey    schemas.ModelProvider
+	Enabled        bool
+	GuardrailCount int
+	AgentHookCount int
+	RequestCount   int64
+	ErrorCount     int64
+	AvgLatencyMs   float64
+	LastRequest    time.Time
+}
+
+// AddRequest adds a request to the stats
+func (ps *ProviderStats) AddRequest(latency time.Duration, isError bool) {
+	ps.RequestCount++
+	if isError {
+		ps.ErrorCount++
+	}
+	ps.LastRequest = time.Now()
+	ps.AvgLatencyMs = (ps.AvgLatencyMs*float64(ps.RequestCount-1) + float64(latency.Milliseconds())) / float64(ps.RequestCount)
+}
+
+// GlobalProviderManager is the global provider manager instance
+var GlobalProviderManager = NewLoopbackProviderManager()
+
+// GetGlobalProviderManager returns the global provider manager
+func GetGlobalProviderManager() *LoopbackProviderManager {
+	return GlobalProviderManager
+}
+
+// InitializeProviderManager initializes the global provider manager with default providers
+func InitializeProviderManager() error {
+	// This will be populated with all 250+ providers
+	// For now, register a few key providers as examples
+	return nil
+}
+
+// GetProviderFactory returns a factory function for creating providers
+type ProviderFactory func() (schemas.Provider, error)
+
+// ProviderRegistry holds all provider factories
+type ProviderRegistry struct {
+	factories map[schemas.ModelProvider]ProviderFactory
+	mu        sync.RWMutex
+}
+
+// NewProviderRegistry creates a new provider registry
+func NewProviderRegistry() *ProviderRegistry {
+	return &ProviderRegistry{
+		factories: make(map[schemas.ModelProvider]ProviderFactory),
+	}
+}
+
+// RegisterFactory registers a provider factory
+func (pr *ProviderRegistry) RegisterFactory(key schemas.ModelProvider, factory ProviderFactory) error {
+	pr.mu.Lock()
+	defer pr.mu.Unlock()
+
+	pr.factories[key] = factory
+	return nil
+}
+
+// GetFactory returns a provider factory
+func (pr *ProviderRegistry) GetFactory(key schemas.ModelProvider) (ProviderFactory, error) {
+	pr.mu.RLock()
+	defer pr.mu.RUnlock()
+
+	factory, ok := pr.factories[key]
+	if !ok {
+		return nil, fmt.Errorf("factory not found: %s", key)
+	}
+
+	return factory, nil
+}
+
+// ListFactories returns all registered factories
+func (pr *ProviderRegistry) ListFactories() map[schemas.ModelProvider]ProviderFactory {
+	pr.mu.RLock()
+	defer pr.mu.RUnlock()
+
+	factories := make(map[schemas.ModelProvider]ProviderFactory)
+	for k, v := range pr.factories {
+		factories[k] = v
+	}
+
+	return factories
+}
+
+// DefaultProviderRegistry is the default provider registry
+var DefaultProviderRegistry = NewProviderRegistry()
+
+// GetDefaultProviderRegistry returns the default provider registry
+func GetDefaultProviderRegistry() *ProviderRegistry {
+	return DefaultProviderRegistry
+}
+
+// InitializeDefaultProviders initializes the default provider registry
+func InitializeDefaultProviders() error {
+	// Register base providers from Bifrost
+	providers := []schemas.ModelProvider{
+		schemas.OpenAI,
+		schemas.Anthropic,
+		schemas.Azure,
+		schemas.Bedrock,
+		schemas.Cohere,
+		schemas.Vertex,
+		schemas.Mistral,
+		schemas.Ollama,
+		schemas.Groq,
+		schemas.SGL,
+		schemas.Parasail,
+		schemas.Perplexity,
+		schemas.Cerebras,
+		schemas.Gemini,
+		schemas.OpenRouter,
+		schemas.Elevenlabs,
+		schemas.HuggingFace,
+		schemas.Nebius,
+		schemas.XAI,
+		schemas.Replicate,
+		schemas.VLLM,
+		schemas.Runway,
+		schemas.Runware,
+		schemas.Fireworks,
+	}
+
+	for _, provider := range providers {
+		// Register base provider factory
+		_ = DefaultProviderRegistry.RegisterFactory(provider, func() (schemas.Provider, error) {
+			// Factory function would be implemented for each provider
+			return nil, nil
+		})
+	}
+
+	return nil
+}

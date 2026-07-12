@@ -1,0 +1,48 @@
+Loopback Gateway
+Copyright 2026 H3 Labs Inc. and the Loopback Gateway authors
+
+This product is a derivative work of Bifrost
+(https://github.com/maximhq/bifrost), Copyright Maxim AI, licensed under the
+Apache License, Version 2.0. A copy of the License is in the LICENSE file.
+
+Modifications have been made to the original Bifrost source as part of building
+Loopback Gateway (Apache License 2.0, Section 4(b)). Notable changes:
+
+  - Added a Go workspace (go.work) so local sub-modules build against the
+    in-tree core rather than a published release.
+  - Added plugins/loopbackguard/: a guardrail engine plugin (15 request/text
+    guardrails, an in-process regex PII/secret redactor, a Microsoft Presidio
+    sidecar connector, and fail-closed PII blocking).
+  - Added plugins/loopbackkafka/: a Kafka data connector publishing completed
+    request/response telemetry (batching, backpressure, SASL/PLAIN).
+  - Added plugins/prompts/: stored prompt-template resolution via request
+    headers, with weighted version deployments.
+  - Added plugins/modelcatalogresolver/: unprefixed-model -> provider lookup
+    as a final pre-request fallback.
+  - Added compliance and identity subsystems across core, framework, and the
+    HTTP transport, including their configuration-store database migrations:
+    RBAC (roles/permissions/assignments with enforcing middleware and a
+    secure-setup flow), HMAC-signed audit logging with export and retention,
+    SSO/SCIM (Keycloak, Okta, Microsoft Entra OIDC providers; inbound SCIM 2.0
+    endpoint; attribute-to-role mapping), JWT authentication mapped to virtual
+    keys, alert channels (Slack/PagerDuty/webhook dispatcher), guardrail and
+    PII-rule configuration APIs, a per-provider circuit breaker, users and
+    business units, MCP tool groups, and scoped admin API keys.
+  - Rebranded the web UI from "Bifrost" to "Loopback Gateway" (~67 files) and
+    added new workspace pages: guardrails, pii-redactor, circuit-breaker, rbac,
+    scim, audit-logs, alert-channels, jwt-auth, prompt-repo, mcp-tool-groups,
+    and observability.
+  - Quarantined non-compiling draft files under docs/draft-stubs/ and added
+    project documentation (ADRs, status/delivery records, roadmap).
+
+Portions of this project incorporate or adapt code from the following
+MIT-licensed projects; their copyright and permission notices are reproduced in
+THIRD_PARTY_LICENSES.md:
+  - Portkey Gateway (https://github.com/Portkey-AI/gateway), Copyright (c) Portkey, Inc.
+    (guardrail checks in plugins/loopbackguard are ported from Portkey's MIT
+    plugins/default/ suite)
+  - LiteLLM (https://github.com/BerriAI/litellm), Copyright (c) LiteLLM authors.
+
+"Bifrost", "Portkey", and "LiteLLM" are trademarks of their respective owners
+and are used here only to describe provenance. Loopback Gateway is not endorsed
+by or affiliated with them.
