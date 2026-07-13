@@ -4,8 +4,8 @@
 > TARGETS, not what is built today.** The 250+ providers, 40+ guardrails, 6 agent
 > frameworks, and `<10µs` numbers are **goals to build toward**, not current
 > functionality — and several were later dropped or reframed (see
-> [ROADMAP.md](../../ROADMAP.md), "Explicitly not planned"). For the truthful
-> current state, see **[STATUS.md](STATUS.md)** and **[DELIVERY.md](DELIVERY.md)**.
+> [ROADMAP.md](https://github.com/haj/loopback-llm-gateway/blob/main/ROADMAP.md), "Explicitly not planned"). For the truthful
+> current state, see **[STATUS.md](https://github.com/haj/loopback-llm-gateway/blob/main/docs/project/STATUS.md)** and **[DELIVERY.md](https://github.com/haj/loopback-llm-gateway/blob/main/docs/project/DELIVERY.md)**.
 > The Bifrost / Portkey / LiteLLM columns remain valid research about those products.
 
 ## Overview
@@ -166,7 +166,7 @@ Go + FastHTTP (Bifrost foundation)
 ## Recommendations
 
 These describe the **target** feature set this matrix aims at, not what is
-shipped today — see [STATUS.md](STATUS.md) for current reality.
+shipped today — see [STATUS.md](https://github.com/haj/loopback-llm-gateway/blob/main/docs/project/STATUS.md) for current reality.
 
 ### For Maximum Performance (target)
 - Bifrost's Go foundation (upstream reports sub-10&micro;s gateway overhead at
@@ -212,7 +212,7 @@ Loopback Gateway **aims to** combine the best of all three open-source projects:
 - **Enterprise features** inherited from Bifrost
 
 That is the destination. For exactly what builds and runs right now, see
-[STATUS.md](STATUS.md) (baseline) and [DELIVERY.md](DELIVERY.md) (per-feature
+[STATUS.md](https://github.com/haj/loopback-llm-gateway/blob/main/docs/project/STATUS.md) (baseline) and [DELIVERY.md](https://github.com/haj/loopback-llm-gateway/blob/main/docs/project/DELIVERY.md) (per-feature
 scorecard). This matrix is early research about targets, not a description of
 shipped features.
 

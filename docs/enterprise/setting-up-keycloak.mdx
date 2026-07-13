@@ -23,9 +23,7 @@ After completing this guide, users will sign in with their Keycloak credentials 
 
 1. In the Keycloak Admin Console, select your realm and go to **Clients → Create client**.
 
-<Frame>
-  <img src="/media/user-provisioning/keycloak-create-client.png" alt="Creating a client in Keycloak" />
-</Frame>
+{/* TODO screenshot: <Frame> <img src="/media/user-provisioning/keycloak-create-client.png" alt="Creating a client in Keycloak" /> </Frame> */}
 
 2. Configure the client:
 
@@ -40,9 +38,7 @@ After completing this guide, users will sign in with their Keycloak credentials 
    - **Standard flow** (Authorization Code)
    - **Service accounts roles** (required for Admin REST API access)
 
-<Frame>
-  <img src="/media/user-provisioning/keycloak-capability-config.png" alt="Keycloak client capability configuration" />
-</Frame>
+{/* TODO screenshot: <Frame> <img src="/media/user-provisioning/keycloak-capability-config.png" alt="Keycloak client capability configuration" /> </Frame> */}
 
 4. On the **Login settings** step set:
 
@@ -61,9 +57,7 @@ After completing this guide, users will sign in with their Keycloak credentials 
 1. Open the client and go to the **Credentials** tab.
 2. Copy the **Client Secret**.
 
-<Frame>
-  <img src="/media/user-provisioning/keycloak-client-credentials.png" alt="Keycloak client credentials tab" />
-</Frame>
+{/* TODO screenshot: <Frame> <img src="/media/user-provisioning/keycloak-client-credentials.png" alt="Keycloak client credentials tab" /> </Frame> */}
 
 ---
 
@@ -76,9 +70,7 @@ Keycloak does not include realm roles or full group paths in tokens by default. 
 
 ### Group Membership mapper
 
-<Frame>
-  <img src="/media/user-provisioning/keycloak-group-mapper.png" alt="Group Membership mapper configuration" />
-</Frame>
+{/* TODO screenshot: <Frame> <img src="/media/user-provisioning/keycloak-group-mapper.png" alt="Group Membership mapper configuration" /> </Frame> */}
 
 | Field | Value |
 | --- | --- |
@@ -118,9 +110,7 @@ The same client runs both authentication and provisioning. Grant it read access 
    - `realm-management` → **view-realm** (recommended, enables group and role listing)
    - `realm-management` → **query-groups** (optional, for group filters)
 
-<Frame>
-  <img src="/media/user-provisioning/keycloak-service-account-roles.png" alt="Keycloak service account roles" />
-</Frame>
+{/* TODO screenshot: <Frame> <img src="/media/user-provisioning/keycloak-service-account-roles.png" alt="Keycloak service account roles" /> </Frame> */}
 
 ---
 
@@ -155,9 +145,7 @@ Create the roles and groups you plan to map into Bifrost.
 5. Configure **Attribute → Role / Team / Business Unit** mappings if needed.
 6. Toggle **Enabled** and click **Save Configuration**.
 
-<Frame>
-  <img src="/media/user-provisioning/keycloak-bifrost-config.png" alt="Bifrost Keycloak configuration form" />
-</Frame>
+{/* TODO screenshot: <Frame> <img src="/media/user-provisioning/keycloak-bifrost-config.png" alt="Bifrost Keycloak configuration form" /> </Frame> */}
 
 ### Using `config.json`
 

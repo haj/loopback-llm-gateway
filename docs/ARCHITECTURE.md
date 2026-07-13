@@ -468,10 +468,10 @@ type CompletionHandler struct {
 
 Each fork plugin has its own `go.mod` and is registered in `go.work`:
 
-- [`plugins/loopbackguard/`](../plugins/loopbackguard/) — guardrail engine: 15 text/request guardrails, in-process regex PII redactor, Presidio connector, fail-closed PII blocking in `PreLLMHook`. Implements `LLMPlugin`.
-- [`plugins/loopbackkafka/`](../plugins/loopbackkafka/) — Kafka data connector publishing completed request/response telemetry (batching, backpressure, SASL/PLAIN). Implements `ObservabilityPlugin`.
-- [`plugins/prompts/`](../plugins/prompts/) — resolves stored prompt templates via `x-bf-prompt-id` / `x-bf-prompt-version` headers and prepends messages to requests. Implements `LLMPlugin` + `HTTPTransportPlugin`.
-- [`plugins/modelcatalogresolver/`](../plugins/modelcatalogresolver/) — single owner of unprefixed-model → provider lookup; runs as the final PreRequestHook fallback after governance/load-balancing plugins.
+- [`plugins/loopbackguard/`](https://github.com/haj/loopback-llm-gateway/tree/main/plugins/loopbackguard/) — guardrail engine: 15 text/request guardrails, in-process regex PII redactor, Presidio connector, fail-closed PII blocking in `PreLLMHook`. Implements `LLMPlugin`.
+- [`plugins/loopbackkafka/`](https://github.com/haj/loopback-llm-gateway/tree/main/plugins/loopbackkafka/) — Kafka data connector publishing completed request/response telemetry (batching, backpressure, SASL/PLAIN). Implements `ObservabilityPlugin`.
+- [`plugins/prompts/`](https://github.com/haj/loopback-llm-gateway/tree/main/plugins/prompts/) — resolves stored prompt templates via `x-bf-prompt-id` / `x-bf-prompt-version` headers and prepends messages to requests. Implements `LLMPlugin` + `HTTPTransportPlugin`.
+- [`plugins/modelcatalogresolver/`](https://github.com/haj/loopback-llm-gateway/tree/main/plugins/modelcatalogresolver/) — single owner of unprefixed-model → provider lookup; runs as the final PreRequestHook fallback after governance/load-balancing plugins.
 
 ### UI Additions
 

@@ -9,7 +9,7 @@ renders** — not aspirations. Legend:
 
 Features were delivered in numbered waves (Wave 1 → Wave 4); the wave/slice
 numbers below (e.g. "4.1") refer to that sequence. The forward plan lives in
-[ROADMAP.md](../../ROADMAP.md).
+[ROADMAP.md](https://github.com/haj/loopback-llm-gateway/blob/main/ROADMAP.md).
 
 ## Scorecard
 
@@ -56,4 +56,4 @@ These fail identically on the clean baseline (local core is ahead of these tests
 - The `transports/.../lib` test **package** now compiles (mock embeds the interface) but the full suite is very long-running; not run to completion here.
 
 ## What remains for true parity
-Circuit-breaker clustering & 4xx/5xx discrimination; BigQuery/Datadog/PubSub connectors (clone the Kafka pattern); full branding asset swap (logo image). The concrete near-term list is [TODO.md](../../TODO.md); the milestone plan is [ROADMAP.md](../../ROADMAP.md).
+Circuit-breaker clustering & 4xx/5xx discrimination; BigQuery/Datadog/PubSub connectors (clone the Kafka pattern); full branding asset swap (logo image). The concrete near-term list is [TODO.md](https://github.com/haj/loopback-llm-gateway/blob/main/TODO.md); the milestone plan is [ROADMAP.md](https://github.com/haj/loopback-llm-gateway/blob/main/ROADMAP.md).

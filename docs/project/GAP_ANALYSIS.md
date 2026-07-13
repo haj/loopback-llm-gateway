@@ -8,7 +8,7 @@ This document answers three questions:
 2. What do Portkey, LiteLLM, and the rest of the market gate behind paid tiers?
 3. Where does our own roadmap over-claim relative to shipped code?
 
-It feeds the milestone plan in [ROADMAP.md](../../ROADMAP.md). Truth hierarchy is unchanged: [STATUS.md](STATUS.md) ≻ [DELIVERY.md](DELIVERY.md) ≻ this document ≻ marketing copy.
+It feeds the milestone plan in [ROADMAP.md](https://github.com/haj/loopback-llm-gateway/blob/main/ROADMAP.md). Truth hierarchy is unchanged: [STATUS.md](https://github.com/haj/loopback-llm-gateway/blob/main/docs/project/STATUS.md) ≻ [DELIVERY.md](https://github.com/haj/loopback-llm-gateway/blob/main/docs/project/DELIVERY.md) ≻ this document ≻ marketing copy.
 
 ---
 
@@ -115,4 +115,4 @@ Quality flags: RBAC and circuit breaker are fail-open/opt-in (documented, delibe
 3. **Position as the independent, security-first, fully-OSS gateway.** Portkey is now a Palo Alto product; LiteLLM has a CVE trust problem; Bifrost gates everything that matters. Concretely: memory-safe Go, minimal deps, signed releases, SBOM, a real SECURITY.md process, and zero paid gates — ever.
 4. **Don't chase**: unified billing/credit fees (hosted-only economics), full 250-provider porting (use an OpenAI-compatible custom-provider escape hatch for the long tail).
 
-The milestone plan implementing this lives in [ROADMAP.md](../../ROADMAP.md).
+The milestone plan implementing this lives in [ROADMAP.md](https://github.com/haj/loopback-llm-gateway/blob/main/ROADMAP.md).
