@@ -44,6 +44,31 @@ features *map to* obligations; your deployment and processes make you compliant,
 software. A BSI C5 control-mapping document and compliance-log mode are on the
 [roadmap](ROADMAP.md).
 
+## How it compares
+
+The short version: open-source LLM gateways typically put the identity/compliance layer
+behind a paid tier, and the EU-focused routers are closed SaaS. Loopback Gateway ships the
+whole thing under Apache-2.0 for self-hosting.
+
+| | **Loopback Gateway** | LiteLLM | Portkey Gateway | LLMGateway | OpenRouter / EU SaaS routers |
+|---|---|---|---|---|---|
+| License | **Apache-2.0, everything included** | MIT core; SSO, audit & more in a paid enterprise tier | MIT gateway; platform features are a hosted product | AGPL-3.0 core; enterprise features under a commercial license | Closed SaaS |
+| Self-hosted | ✅ single Go binary or container | ✅ | ✅ (gateway) | ✅ | ❌ (hosted only) |
+| Core language | Go | Python | TypeScript | TypeScript | — |
+| RBAC + SSO/SCIM | ✅ included (Keycloak, Okta, Entra; inbound SCIM 2.0) | Paid tier | Hosted platform | Paid tier | Vendor-managed |
+| Audit logging | ✅ HMAC-signed, export + retention, included | Paid tier | Hosted platform | Paid tier | Vendor-side |
+| Guardrails & PII redaction | ✅ 15 guardrails + regex/Presidio redaction, fail-closed option | Partial | ✅ (some hosted) | Basic | Vendor-side |
+| Providers / models | ~25 providers; embedded catalog of 2,900+ models, offline by default | 100+ providers | 250+ providers | 40+ providers | Large hosted catalogs |
+| Outbound calls with default config | **None** (embedded catalog, no phone-home) | Varies | Varies | Varies | All traffic transits vendor |
+| EU data posture | Runs entirely in your infrastructure; EU-residency routing policy on the [roadmap](ROADMAP.md) | Self-host possible | Self-host possible | Self-host possible | EU regions on US-owned hyperscalers; subject to EU–US transfer-framework risk |
+
+Where others are stronger today, honestly: LiteLLM and Portkey support far more providers,
+OpenRouter has an unmatched hosted model catalog, and hosted products ship dashboards and
+scale you don't have to operate. This table describes defaults and licensing as of July
+2026, based on each project's public documentation — if we got something wrong about your
+project, please [open an issue](https://github.com/haj/loopback-llm-gateway/issues) and we
+will correct it.
+
 ## Features
 
 ### Gateway core (inherited from Bifrost)
