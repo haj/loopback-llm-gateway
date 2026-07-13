@@ -310,9 +310,9 @@ general_settings:
 
 | Gateway | Migration Steps |
 |---------|----------------|
-| **Portkey** | 1. Install @portkey-ai/gateway<br>2. Set up local gateway<br>3. Update API base URL<br>4. Configure providers |
-| **Bifrost** | 1. Install Bifrost<br>2. Configure providers in UI/API<br>3. Update API base URL<br>4. Optional: Use Go SDK for better performance |
-| **LiteLLM** | 1. Install LiteLLM<br>2. Configure model_list<br>3. Update API base URL<br>4. Optional: Use Admin UI for model management |
+| **Portkey** | 1. Install @portkey-ai/gateway<br/>2. Set up local gateway<br/>3. Update API base URL<br/>4. Configure providers |
+| **Bifrost** | 1. Install Bifrost<br/>2. Configure providers in UI/API<br/>3. Update API base URL<br/>4. Optional: Use Go SDK for better performance |
+| **LiteLLM** | 1. Install LiteLLM<br/>2. Configure model_list<br/>3. Update API base URL<br/>4. Optional: Use Admin UI for model management |
 
 ### From Another Gateway
 
