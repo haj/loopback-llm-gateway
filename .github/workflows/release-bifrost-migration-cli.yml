@@ -1,9 +1,9 @@
 name: Release Migration CLI
 
+# Manual trigger while the fork's release process is being set up (see TODO.md);
+# upstream released automatically on every push to main.
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 # Prevent concurrent runs
 concurrency:
@@ -70,7 +70,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: "1.26.4"
+          go-version: "1.26.5"
 
       - name: Run bifrost-migration-cli tests
         working-directory: scripts/bifrost-migration-cli
@@ -102,7 +102,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: "1.26.4"
+          go-version: "1.26.5"
 
       - name: Configure Git
         run: |

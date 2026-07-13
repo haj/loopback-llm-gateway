@@ -102,7 +102,7 @@ Claims in the early README/FEATURE_MATRIX/roadmap drafts that code does not back
 | 6 agent-framework integrations | **1** — LangChain, as an OpenAI-compatible route alias | AutoGen, CrewAI, LlamaIndex, Phidata, ControlFlow absent |
 | Data connectors | Kafka only | BigQuery/Datadog/PubSub UIs have no backends — saving fails |
 | White-label | 67 files rebranded | Logo asset still Bifrost; no theming API |
-| SLA monitoring, <10µs, 10k RPS | unverified | No benchmarks run; upstream's numbers are self-published |
+| SLA monitoring, `<10µs,` 10k RPS | unverified | No benchmarks run; upstream's numbers are self-published |
 
 Quality flags: RBAC and circuit breaker are fail-open/opt-in (documented, deliberate — but fresh installs are permissive until configured); Kafka/Keycloak/Presidio are hermetically tested only, not yet live-verified against real sidecars.
 

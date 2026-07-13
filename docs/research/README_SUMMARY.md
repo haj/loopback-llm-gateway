@@ -91,7 +91,7 @@ Features:
 
 | Metric | Target | Current Best |
 |--------|--------|--------------|
-| Latency | <10µs | ~11µs (Bifrost) |
+| Latency | `<10µs` | ~11µs (Bifrost) |
 | Throughput | >10,000 RPS | 5,000 RPS (Bifrost) |
 | Providers | 250+ | 200+ (Portkey) |
 | Guardrails | 40+ | 40+ (Portkey) |

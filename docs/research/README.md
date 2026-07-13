@@ -18,7 +18,7 @@ This repository contains comparisons of open-source AI gateways found in the par
 |---------|----------------|---------|---------|
 | Language | TypeScript | Go | Python |
 | Providers | 200+ | 23+ | 100+ |
-| Performance | <1ms | ~11µs | Variable |
+| Performance | `<1ms` | ~11µs | Variable |
 | Enterprise | ✅ | ✅ | ✅ |
 | Agent Integrations | Autogen, CrewAI, etc. | LangChain | LangChain |
 | Best For | Max providers, agent frameworks | Go performance, enterprise | Local models, Python |

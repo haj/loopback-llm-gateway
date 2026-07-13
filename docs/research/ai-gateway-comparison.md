@@ -76,7 +76,7 @@ This document compares three open-source AI gateways available in the parent pro
 
 | Feature | Portkey Gateway | Bifrost AI Gateway | LiteLLM Gateway |
 |---------|----------------|-------------------|-----------------|
-| **Latency overhead** | <1ms | ~11µs | Varies |
+| **Latency overhead** | `<1ms` | ~11µs | Varies |
 | **Max RPS tested** | 10B+ tokens/day | 5,000 RPS | Not specified |
 | **Memory footprint** | 122kb | Small | Varies |
 

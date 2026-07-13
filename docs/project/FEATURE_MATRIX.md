@@ -79,8 +79,8 @@ This document compares the three open-source gateways analyzed
 
 | Metric | Bifrost | Portkey | LiteLLM | Loopback (target) |
 |--------|---------|---------|---------|----------|
-| **Base Latency** | ~11µs | Unknown | Unknown | **<10µs** |
-| **Key Selection** | ~10ns | Unknown | Unknown | **<5ns** |
+| **Base Latency** | ~11µs | Unknown | Unknown | **`<10µs`** |
+| **Key Selection** | ~10ns | Unknown | Unknown | **`<5ns`** |
 | **Max RPS** | 5,000 | Unknown | Unknown | **10,000+** |
 | **Memory Efficiency** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 
@@ -165,21 +165,19 @@ Go + FastHTTP (Bifrost foundation)
 
 ## Recommendations
 
-### For Maximum Performance
-**Choose: Loopback Gateway**
-- Bifrost's Go foundation with 250+ providers
-- <10µs latency
-- 10,000+ RPS throughput
+These describe the **target** feature set this matrix aims at, not what is
+shipped today — see [STATUS.md](STATUS.md) for current reality.
 
-### For Maximum Provider Coverage
-**Choose: Loopback Gateway**
-- 250+ providers from all three sources
-- Local model support via LiteLLM
-- Specialized providers via Portkey
+### For Maximum Performance (target)
+- Bifrost's Go foundation (upstream reports sub-10&micro;s gateway overhead at
+  high RPS; unverified in this fork — reproducible benchmarks are a roadmap item)
 
-### For Maximum Guardrails
-**Choose: Loopback Gateway**
-- 40+ guardrails from Portkey
+### For Maximum Provider Coverage (target)
+- ~25 providers today; scaling toward 250+ is roadmap
+- Local model support (Ollama, vLLM, SGLang)
+
+### For Maximum Guardrails (target)
+- 15 guardrails shipped (ported from Portkey), 40+ is the target
 - Content moderation
 - PII detection & redaction
 

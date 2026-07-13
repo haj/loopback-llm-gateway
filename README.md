@@ -2,6 +2,7 @@
 
 **The open-source, self-hostable LLM gateway for European enterprises and the public sector.**
 
+[![CI](https://github.com/haj/loopback-llm-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/haj/loopback-llm-gateway/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/haj/loopback-llm-gateway)](LICENSE)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/haj/loopback-llm-gateway?filename=core%2Fgo.mod)](https://go.dev/dl/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)

@@ -17,24 +17,40 @@ updates:
     directory: /cli
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /core
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /examples/mcps/auth-demo-server
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /examples/mcps/edge-case-server
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: npm
@@ -47,6 +63,10 @@ updates:
     directory: /examples/mcps/error-test-server
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: npm
@@ -59,18 +79,30 @@ updates:
     directory: /examples/mcps/go-test-server
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /examples/mcps/http-no-ping-server
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /examples/mcps/parallel-test-server
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: npm
@@ -95,6 +127,10 @@ updates:
     directory: /examples/plugins/hello-world-wasm-go
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: cargo
@@ -113,36 +149,60 @@ updates:
     directory: /examples/plugins/hello-world
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /examples/plugins/http-transport-only
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /examples/plugins/llm-only
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /examples/plugins/mcp-only
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /examples/plugins/multi-interface
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /framework
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: npm
@@ -161,54 +221,90 @@ updates:
     directory: /plugins/governance
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /plugins/jsonparser
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /plugins/litellmcompat
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /plugins/logging
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /plugins/maxim
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /plugins/mocker
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /plugins/otel
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /plugins/semanticcache
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /plugins/telemetry
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: npm
@@ -233,6 +329,10 @@ updates:
     directory: /tests/governance
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: npm
@@ -245,18 +345,30 @@ updates:
     directory: /tests/scripts/1millogs
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /tests/scripts/migration-checker
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: gomod
     directory: /transports
     schedule:
       interval: daily
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
     open-pull-requests-limit: 0
 
   - package-ecosystem: npm
@@ -269,53 +381,97 @@ updates:
     directory: /.github/workflows/scripts/schemasync
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
 
   - package-ecosystem: gomod
     directory: /examples/mcps/oauth-demo-server
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
 
   - package-ecosystem: gomod
     directory: /plugins/compat
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
 
   - package-ecosystem: gomod
     directory: /plugins/prompts
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
 
   - package-ecosystem: gomod
     directory: /tests/async
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
 
   - package-ecosystem: gomod
     directory: /tests/e2e/clis
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
 
   - package-ecosystem: gomod
     directory: /tests/semanticcache
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
 
   - package-ecosystem: gomod
     directory: /tests/cmd/e2eseed
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
 
   - package-ecosystem: gomod
     directory: /tests/cmd/seed
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
 
   - package-ecosystem: gomod
     directory: /tests/cmd/seedvks
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"
 
   - package-ecosystem: gomod
     directory: /plugins/modelcatalogresolver
     schedule:
       interval: weekly
+    ignore:
+      # Fork-internal modules: built against the local tree via go.work;
+      # upstream's published releases have diverged from this fork.
+      - dependency-name: "github.com/maximhq/bifrost/*"

@@ -29,7 +29,7 @@ A unified AI gateway that combines the best features from:
 
 | Factor | Go | TypeScript/Node | Python |
 |--------|----|-----------------|--------|
-| **Latency** | ⭐⭐⭐⭐⭐ (~11µs) | ⭐⭐⭐ (<1ms) | ⭐⭐⭐⭐ (variable) |
+| **Latency** | ⭐⭐⭐⭐⭐ (~11µs) | ⭐⭐⭐ (`<1ms`) | ⭐⭐⭐⭐ (variable) |
 | **Throughput** | ⭐⭐⭐⭐⭐ (5k+ RPS) | ⭐⭐⭐⭐ (high) | ⭐⭐⭐ (medium) |
 | **Concurrency** | ⭐⭐⭐⭐⭐ (goroutines) | ⭐⭐⭐ (event loop) | ⭐⭐ (GIL) |
 | **Memory** | ⭐⭐⭐⭐⭐ (efficient) | ⭐⭐⭐ (moderate) | ⭐⭐⭐ (high) |
@@ -338,11 +338,11 @@ observability:
 
 | Metric | Target | Bifrost | Portkey | Improvement |
 |--------|--------|---------|---------|-------------|
-| **Base Latency** | <5µs | ~11µs | <1ms | 2x faster |
-| **Key Selection** | <5ns | ~10ns | N/A | 2x faster |
-| **Request Overhead** | <10µs | ~11µs | ~500µs | 50x faster |
+| **Base Latency** | `<5µs` | ~11µs | `<1ms` | 2x faster |
+| **Key Selection** | `<5ns` | ~10ns | N/A | 2x faster |
+| **Request Overhead** | `<10µs` | ~11µs | ~500µs | 50x faster |
 | **Max RPS** | 10,000+ | 5,000 | 10B+ tokens/day | 2x higher |
-| **Memory Footprint** | <50MB | ~100MB | ~122KB | 500x smaller |
+| **Memory Footprint** | `<50MB` | ~100MB | ~122KB | 500x smaller |
 | **Success Rate @ 5k RPS** | 99.9% | 100% | Not specified | Match |
 
 **Note**: Memory footprint optimization through Go's efficient memory management and object pooling.
@@ -399,7 +399,7 @@ observability:
 
 The Loopback Gateway aims to be:
 
-1. **Fastest**: Go-based with <10µs overhead
+1. **Fastest**: Go-based with `<10µs` overhead
 2. **Most Compatible**: 250+ providers (Portkey + LiteLLM)
 3. **Most Secure**: Enterprise-grade security from both platforms
 4. **Most Extensible**: Plugin-based architecture

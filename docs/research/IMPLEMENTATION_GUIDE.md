@@ -251,7 +251,7 @@ kubectl apply -f deployment.yaml
 
 | Metric | Target | Status |
 |--------|--------|--------|
-| Latency | <10µs | ✅ |
+| Latency | `<10µs` | ✅ |
 | Throughput | >10,000 RPS | ✅ |
 | Providers | 250+ | ✅ |
 | Guardrails | 40+ | ✅ |

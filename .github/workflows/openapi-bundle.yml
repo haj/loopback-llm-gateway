@@ -9,7 +9,7 @@ on:
       - "!docs/openapi/openapi.json"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   bundle-openapi:
@@ -27,8 +27,6 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          token: ${{ secrets.GH_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
@@ -47,15 +45,12 @@ jobs:
         working-directory: ./docs/openapi
         run: python bundle.py
 
-      - name: Commit and push changes
-        if: github.event_name == 'push'
+      - name: Fail if openapi.json is out of date
         run: |
-          CURRENT_BRANCH="${GITHUB_REF_NAME:-main}"
-
-          git add docs/openapi/openapi.json
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-            exit 0
+          if ! git diff --quiet docs/openapi/openapi.json; then
+            echo "::error::docs/openapi/openapi.json is out of date."
+            echo "Run 'python docs/openapi/bundle.py' locally and commit the result."
+            git diff --stat docs/openapi/openapi.json
+            exit 1
           fi
-          git commit -m "chore: regenerate openapi.json --skip-ci"
-          git push origin "$CURRENT_BRANCH"
+          echo "openapi.json is up to date"

@@ -205,7 +205,7 @@ general_settings:
 
 | Metric | Portkey Gateway | Bifrost AI Gateway | LiteLLM Gateway |
 |--------|----------------|-------------------|-----------------|
-| **Base Overhead** | <1ms | ~11µs | ~1-10ms |
+| **Base Overhead** | `<1ms` | ~11µs | ~1-10ms |
 | **Key Selection** | N/A | ~10ns | N/A |
 | **Success Rate @ 5k RPS** | N/A | 100% | N/A |
 | **Queue Wait Time** | N/A | 1.67µs | N/A |

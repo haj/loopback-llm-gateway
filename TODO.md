@@ -53,8 +53,9 @@ align on scope.
 
 - [ ] **Set up GitHub Discussions and issue labels** (good-first-issue, help-wanted,
       area/* labels matching the workspace pages) and review the inherited issue templates.
-- [ ] **Public CI.** Get build + test workflows green on the public repo, then add the
-      build badge to README.md (deliberately omitted until CI is public).
+- [ ] **Broaden public CI.** A build + hermetic-unit-test workflow (ci.yml) runs on the
+      public repo; extend it with lint (golangci-lint) and more test suites as they prove
+      hermetic. Snyk was removed for lack of an org token — revisit.
 - [ ] **Docs site decision.** `docs/` is a Mintlify site (`docs.json`) inherited from
       upstream and still contains upstream-hosted asset references; decide between
       self-hosting a docs site under the fork's domain or trimming to in-repo Markdown.

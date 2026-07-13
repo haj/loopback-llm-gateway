@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build & unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Node
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4.4.0
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Build UI (typecheck + bundle, embedded into the gateway binary)
+        working-directory: ui
+        run: |
+          npm ci
+          npm run build
+
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: "1.26.5"
+          cache-dependency-path: |
+            transports/go.sum
+            cli/go.sum
+
+      - name: Build gateway binary
+        working-directory: transports
+        run: go build ./...
+
+      - name: Build CLI
+        working-directory: cli
+        run: go build ./...
+
+      - name: Unit tests (hermetic packages, no live provider APIs)
+        run: |
+          (cd plugins/loopbackguard && go test ./...)
+          (cd framework && go test ./modelcatalog/... ./sso/...)
+          (cd core && go test ./schemas/...)
