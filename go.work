@@ -1,0 +1,29 @@
+// go.work unifies the local multi-module workspace so sub-modules
+// (framework, transports, cli, plugins) build against the LOCAL ./core
+// checkout instead of the published github.com/maximhq/bifrost/core release.
+// Required for a fork that modifies core ahead of any published version.
+go 1.26.5
+
+use (
+	./cli
+	./core
+	./framework
+	./plugins/compat
+	./plugins/governance
+	./plugins/jsonparser
+	./plugins/logging
+	./plugins/loopbackguard
+	./plugins/loopbackkafka
+	./plugins/maxim
+	./plugins/mocker
+	./plugins/modelcatalogresolver
+	./plugins/otel
+	./plugins/prompts
+	./plugins/semanticcache
+	./plugins/telemetry
+	./transports
+)
+
+replace github.com/maximhq/bifrost/plugins/loopbackguard v0.0.0-00010101000000-000000000000 => ./plugins/loopbackguard
+
+replace github.com/maximhq/bifrost/plugins/loopbackkafka v0.0.0-00010101000000-000000000000 => ./plugins/loopbackkafka
