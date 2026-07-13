@@ -7,8 +7,8 @@
 
 ## Mission
 
-Build the **independent, security-first, fully open-source LLM gateway for European
-enterprises and the public sector** — no enterprise tier, no paid gates, no usage markup.
+Build the **independent, security-first, fully open-source LLM gateway** — no enterprise
+tier, no paid gates, no usage markup.
 
 The strategy in two lines:
 
@@ -16,10 +16,9 @@ The strategy in two lines:
    identity + compliance + high availability (SSO/SCIM, RBAC, audit retention, vault sync,
    clustering). We ship it under Apache-2.0, on top of upstream Bifrost's performance core,
    staying merge-compatible with upstream ([ADR 0001](docs/adr/0001-language-and-base.md)).
-2. **Own the European sovereignty niche.** US-centric OSS gateways don't address GDPR
-   processor duties, EU AI Act deployer logging, or data-residency policy; EU-flavoured
-   SaaS routers are closed and run on US hyperscalers. Loopback Gateway aims to be the
-   open-source, self-hostable, enterprise-featured, sovereignty-positioned option.
+2. **Stay self-contained.** Everything runs in your infrastructure with zero phone-home
+   by default. Data-control features (residency routing, retention policy, compliance-grade
+   log export) are first-class citizens rather than a hosted upsell.
 
 Market evidence behind this plan: [docs/project/GAP_ANALYSIS.md](docs/project/GAP_ANALYSIS.md).
 
@@ -54,25 +53,19 @@ Finish the depth deliberately deferred from the first slices:
   additive-only).
 - Audit export to S3/GCS object storage.
 
-## Milestone 5 — European sovereignty track
+## Milestone 5 — Data-control & compliance features
 
-The differentiator milestone. Headline feature first:
-
-- **EU-residency routing policy** — tag providers/endpoints as `eu-resident` and define a
-  policy that routes requests **only** to EU-resident providers, with explicit,
-  audit-logged exceptions. One switch to answer "can any prompt leave the EU?".
-- **First-class EU provider integrations** — deepen and document EU-hosted model providers:
-  Mistral (already supported upstream), OVHcloud AI Endpoints, Scaleway Generative APIs,
-  IONOS AI Model Hub, Nebius (already supported upstream), Aleph Alpha.
+- **Residency routing policy** — tag providers/endpoints with a region (e.g. `eu`, `us`,
+  `on-prem`) and define a policy that routes requests **only** to matching providers, with
+  explicit, audit-logged exceptions. One switch to answer "can any prompt leave region X?".
+- **Broader regional provider coverage** — deepen and document region-hosted model
+  providers beyond the US hyperscalers: Mistral (already supported upstream), OVHcloud AI
+  Endpoints, Scaleway Generative APIs, IONOS AI Model Hub, Nebius (already supported
+  upstream), Aleph Alpha.
 - **Compliance-log mode** — retention policy per log class (request logs vs audit events vs
-  telemetry) and an export format aligned with EU AI Act record-keeping expectations
-  (Art. 12 logging; Art. 26 deployer obligations, which expand on 2 August 2026).
-- **DPA/DPIA documentation templates** — deployment-specific data-processing documentation
-  templates operators can hand to their DPO.
-- **Nordics-first enablement** — reference architectures and deployment guides for
-  Danish/Nordic enterprise and public-sector environments (Keycloak-based SSO,
-  on-prem/EU-cloud installs); then Germany, with a **BSI C5 control-mapping document**
-  ("maps to" language only — no certification claims).
+  telemetry) and an export format suitable for regulatory record-keeping regimes.
+- **Data-processing documentation templates** — deployment-specific templates operators can
+  hand to their privacy/compliance teams.
 
 ## Milestone 6 — Telemetry connectors & guardrail breadth
 
@@ -123,7 +116,7 @@ No OSS gateway ships this today; every vendor charges for it.
 ## Success criteria
 
 - [ ] Zero features behind any gate that isn't in this repo (no paid tiers, no stub upsells)
-- [ ] EU-residency routing policy shipped and documented
+- [ ] Residency routing policy shipped and documented
 - [ ] 40+ guardrails, honestly countable in `plugins/loopbackguard`
 - [ ] 3-node cluster survives a node kill with no dropped state (demo + test)
 - [ ] Published reproducible benchmark

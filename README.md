@@ -1,6 +1,6 @@
 # Loopback Gateway
 
-**The open-source, self-hostable LLM gateway for European enterprises and the public sector.**
+**The open-source LLM gateway with the enterprise tier built in.**
 
 [![CI](https://github.com/haj/loopback-llm-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/haj/loopback-llm-gateway/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/haj/loopback-llm-gateway)](LICENSE)
@@ -18,56 +18,41 @@ clean — see [ADR 0001](docs/adr/0001-language-and-base.md)) and build the iden
 compliance, and safety layer on top: the cluster of features that gateway vendors typically
 reserve for paid tiers.
 
-The focus is deliberately European. Organisations subject to the GDPR and the EU AI Act —
-and public-sector bodies wary of routing prompts through US-hosted SaaS — need an LLM
-gateway that runs entirely inside their own infrastructure, redacts personal data before it
-leaves, and keeps verifiable logs of every AI interaction. That is the gap Loopback Gateway
-is built for: existing open-source gateways are US-centric, and the EU-flavoured routers are
-closed SaaS running on US hyperscalers.
+The idea is simple. Across the LLM-gateway market, the same features keep landing behind
+enterprise paywalls: SSO and SCIM provisioning, RBAC, audit logging, guardrails, PII
+redaction, alerting, prompt management. Loopback Gateway gathers that paid tier from across
+the ecosystem and ships it open source. A useful side effect of self-hosting it all:
+prompts, completions, keys, and logs never transit a third-party service — the default
+install makes **zero outbound calls** beyond the providers you configure.
 
-## Why European teams
-
-Self-hosting means prompts, completions, keys, and logs never transit a third-party service.
-On top of that, fork features map onto concrete regulatory duties:
-
-| Capability | Helps with |
-|---|---|
-| **Self-hosting** — single binary/container in your own infra or EU cloud | Data residency and sovereignty; no reliance on US-hosted SaaS routers (relevant given Schrems II and the continuing legal instability around EU–US transfer frameworks) |
-| **PII redaction before egress** — in-process regex rules + [Presidio](https://microsoft.github.io/presidio/) connector, with a fail-closed blocking mode | GDPR data minimisation (Art. 5(1)(c)) and processor duties when prompts contain personal data |
-| **Signed audit logs** — HMAC-chained events, export (JSONL/syslog), retention pruning | EU AI Act record-keeping and deployer logging obligations (Art. 12, Art. 26 — deployer obligations for high-risk systems expand on 2 August 2026) |
-| **RBAC + SSO/SCIM** — Keycloak, Okta, Microsoft Entra; inbound SCIM 2.0 | Access control and oversight requirements; Keycloak is what much of the EU public sector already runs |
-| **Guardrails + circuit breaker** | Operational risk controls and human-defined usage policies |
-
-To be explicit about what this is **not**: Loopback Gateway carries no certifications and we
-make no compliance guarantees — no "GDPR certified", no ISO 27001/SOC 2/BSI C5 claims. These
-features *map to* obligations; your deployment and processes make you compliant, not the
-software. A BSI C5 control-mapping document and compliance-log mode are on the
-[roadmap](ROADMAP.md).
+To be explicit about what this is **not**: Loopback Gateway carries no certifications and
+makes no compliance guarantees. Features like signed audit logs and PII redaction can
+support your compliance work; your deployment and processes are what make you compliant.
 
 ## How it compares
 
-The short version: open-source LLM gateways typically put the identity/compliance layer
-behind a paid tier, and the EU-focused routers are closed SaaS. Loopback Gateway ships the
-whole thing under Apache-2.0 for self-hosting.
+The short version: gateway vendors give routing away and charge for governance. Loopback
+Gateway ships the whole thing under Apache-2.0 — including the features our own upstream
+sells as its enterprise tier.
 
-| | **Loopback Gateway** | LiteLLM | Portkey Gateway | LLMGateway | OpenRouter / EU SaaS routers |
-|---|---|---|---|---|---|
-| License | **Apache-2.0, everything included** | MIT core; SSO, audit & more in a paid enterprise tier | MIT gateway; platform features are a hosted product | AGPL-3.0 core; enterprise features under a commercial license | Closed SaaS |
-| Self-hosted | ✅ single Go binary or container | ✅ | ✅ (gateway) | ✅ | ❌ (hosted only) |
-| Core language | Go | Python | TypeScript | TypeScript | — |
-| RBAC + SSO/SCIM | ✅ included (Keycloak, Okta, Entra; inbound SCIM 2.0) | Paid tier | Hosted platform | Paid tier | Vendor-managed |
-| Audit logging | ✅ HMAC-signed, export + retention, included | Paid tier | Hosted platform | Paid tier | Vendor-side |
-| Guardrails & PII redaction | ✅ 15 guardrails + regex/Presidio redaction, fail-closed option | Partial | ✅ (some hosted) | Basic | Vendor-side |
-| Providers / models | ~25 providers; embedded catalog of 2,900+ models, offline by default | 100+ providers | 250+ providers | 40+ providers | Large hosted catalogs |
-| Outbound calls with default config | **None** (embedded catalog, no phone-home) | Varies | Varies | Varies | All traffic transits vendor |
-| EU data posture | Runs entirely in your infrastructure; EU-residency routing policy on the [roadmap](ROADMAP.md) | Self-host possible | Self-host possible | Self-host possible | EU regions on US-owned hyperscalers; subject to EU–US transfer-framework risk |
+| | **Loopback Gateway** | Bifrost (upstream) | LiteLLM | Portkey Gateway | LLMGateway | Hosted routers (OpenRouter etc.) |
+|---|---|---|---|---|---|---|
+| License | **Apache-2.0, everything included** | Apache-2.0 core; governance/identity features sold commercially | MIT core; SSO, audit & more in a paid enterprise tier | MIT gateway; platform features are a hosted product | AGPL-3.0 core; enterprise features under a commercial license | Closed SaaS |
+| Self-hosted | ✅ single Go binary or container | ✅ | ✅ | ✅ (gateway) | ✅ | ❌ (hosted only) |
+| Core language | Go | Go | Python | TypeScript | TypeScript | — |
+| RBAC + SSO/SCIM | ✅ included (Keycloak, Okta, Entra; inbound SCIM 2.0) | Commercial | Paid tier | Hosted platform | Paid tier | Vendor-managed |
+| Audit logging | ✅ HMAC-signed, export + retention, included | Commercial | Paid tier | Hosted platform | Paid tier | Vendor-side |
+| Guardrails & PII redaction | ✅ 15 guardrails + regex/Presidio redaction, fail-closed option | Commercial | Partial | ✅ (some hosted) | Basic | Vendor-side |
+| Alert channels | ✅ Slack, PagerDuty, signed webhooks | Commercial | Paid tier | Hosted platform | Partial | Vendor-side |
+| Providers / models | ~25 providers; embedded catalog of 2,900+ models, offline by default | ~25 providers; catalog synced from vendor endpoint | 100+ providers | 250+ providers | 40+ providers | Large hosted catalogs |
+| Outbound calls with default config | **None** (embedded catalog, no phone-home) | Catalog + update checks call vendor endpoints | Varies | Varies | Varies | All traffic transits vendor |
 
 Where others are stronger today, honestly: LiteLLM and Portkey support far more providers,
-OpenRouter has an unmatched hosted model catalog, and hosted products ship dashboards and
-scale you don't have to operate. This table describes defaults and licensing as of July
-2026, based on each project's public documentation — if we got something wrong about your
-project, please [open an issue](https://github.com/haj/loopback-llm-gateway/issues) and we
-will correct it.
+OpenRouter has an unmatched hosted model catalog, hosted products ship dashboards and scale
+you don't have to operate, and upstream Bifrost's commercial offering comes with a vendor
+behind it. This table describes defaults and licensing as of July 2026, based on each
+project's public documentation — if we got something wrong about your project, please
+[open an issue](https://github.com/haj/loopback-llm-gateway/issues) and we will correct it.
 
 ## Features
 
@@ -177,7 +162,7 @@ make docker-run CONFIG=./config.json      # runs it
 | [docs/README.md](docs/README.md) | Index of the full documentation tree |
 | [docs/project/STATUS.md](docs/project/STATUS.md) | Ground truth for what actually builds and runs |
 | [docs/project/DELIVERY.md](docs/project/DELIVERY.md) | Per-feature delivery scorecard (shipped vs first-slice vs deferred) |
-| [ROADMAP.md](ROADMAP.md) | Public milestone roadmap, including the EU sovereignty track |
+| [ROADMAP.md](ROADMAP.md) | Public milestone roadmap |
 | [TODO.md](TODO.md) | Near-term concrete task list — good place to find a first contribution |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Dev setup, tests, PR process |
 | [SECURITY.md](SECURITY.md) | Vulnerability reporting |
