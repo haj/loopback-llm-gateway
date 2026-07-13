@@ -19,9 +19,18 @@ const (
 
 // Config is the model pricing configuration.
 type Config struct {
+	// PricingURL overrides the pricing datasheet source. Empty/nil loads the
+	// embedded LiteLLM catalog snapshot (no network access); http(s):// and
+	// file:// sources are accepted in either the LiteLLM raw format or the
+	// transformed datasheet format (datasheet.UpstreamPricingURL serves the
+	// latter).
 	PricingURL          *string `json:"pricing_url,omitempty"`
 	PricingSyncInterval *int64  `json:"pricing_sync_interval,omitempty"` // seconds
-	ModelParametersURL  *string `json:"model_parameters_url,omitempty"`
+	// ModelParametersURL enables the model-parameters (UI metadata) sync.
+	// Empty/nil disables it — max_output_tokens is still seeded from the
+	// pricing datasheet. datasheet.UpstreamModelParametersURL restores the
+	// previous upstream-hosted source.
+	ModelParametersURL *string `json:"model_parameters_url,omitempty"`
 
 	// MCPLibraryURL overrides the endpoint the MCP server library catalog is
 	// synced from. Empty/nil uses DefaultMCPLibraryURL. Mirrors PricingURL: the

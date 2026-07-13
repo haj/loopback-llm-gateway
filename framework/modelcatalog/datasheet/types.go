@@ -62,6 +62,10 @@ func (p *Entry) UnmarshalJSON(data []byte) error {
 	type entryAlias Entry
 	var raw struct {
 		entryAlias
+		// LiteLLM's raw model_prices_and_context_window.json names the
+		// provider field litellm_provider; the transformed datasheet format
+		// names it provider. Accept both so either source loads directly.
+		LitellmProvider           string `json:"litellm_provider"`
 		SearchContextCostPerQuery *struct {
 			Low    *float64 `json:"search_context_size_low"`
 			Medium *float64 `json:"search_context_size_medium"`
@@ -72,6 +76,9 @@ func (p *Entry) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*p = Entry(raw.entryAlias)
+	if p.Provider == "" {
+		p.Provider = raw.LitellmProvider
+	}
 
 	// search_context_cost_per_query arrives as a tiered object — all three values are
 	// equal for non-Perplexity providers; we prefer medium, then low, then high.
@@ -326,6 +333,8 @@ func normalizeProvider(p string) string {
 	switch {
 	case strings.Contains(p, "vertex_ai") || p == "google-vertex":
 		return string(schemas.Vertex)
+	case strings.HasPrefix(p, "azure_ai"):
+		return string(schemas.Azure)
 	case strings.Contains(p, "bedrock"):
 		return string(schemas.Bedrock)
 	case strings.Contains(p, "cohere"):

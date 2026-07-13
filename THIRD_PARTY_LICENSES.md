@@ -67,6 +67,15 @@ Copyright (c) LiteLLM authors. Source: https://github.com/BerriAI/litellm
 > proprietary license in its `enterprise/` directory. Do NOT port from that
 > directory. Everything outside it is MIT.
 
+Vendored data:
+
+- `framework/modelcatalog/datasheet/embedded/litellm_model_prices.json` — a
+  minified snapshot of LiteLLM's `model_prices_and_context_window.json`
+  (model pricing, context windows, and capability metadata), embedded as the
+  gateway's default offline model catalog. Provenance and refresh
+  instructions: `framework/modelcatalog/datasheet/embedded/README.md`;
+  refresh with `scripts/update-model-catalog.sh`.
+
 Ported files: _(none yet)_
 
 ---

@@ -44,6 +44,10 @@ align on scope.
       `make docker-image LOCAL=1` in CI and push to GHCR under the fork org.
 - [ ] **Branding: logo asset swap.** The text rebrand is done across ~67 UI files, but the
       logo `.webp` still shows the Bifrost mark.
+- [ ] **Automate model-catalog refresh.** `scripts/update-model-catalog.sh` refreshes the
+      embedded LiteLLM pricing snapshot manually; add a scheduled CI job that runs it and
+      opens a PR when the catalog changes (update
+      `framework/modelcatalog/datasheet/embedded/README.md` provenance in the same PR).
 
 ## Open-source launch
 

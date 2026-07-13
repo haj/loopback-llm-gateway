@@ -180,7 +180,9 @@ func (s *Store) loadPricingFromURL(ctx context.Context) (map[string]Entry, error
 
 	var data []byte
 
-	if parsed.Scheme == "file" {
+	if parsed.Scheme == "embedded" {
+		data = embeddedPricingData
+	} else if parsed.Scheme == "file" {
 		data, err = os.ReadFile(filePathFromURL(parsed))
 		if err != nil {
 			return nil, fmt.Errorf("failed to read pricing file: %w", err)
@@ -207,12 +209,36 @@ func (s *Store) loadPricingFromURL(ctx context.Context) (map[string]Entry, error
 			return nil, fmt.Errorf("failed to read pricing data response: %w", err)
 		}
 	}
-	var pricingData map[string]Entry
-	if err := json.Unmarshal(data, &pricingData); err != nil {
+	// Decode in two phases so one malformed entry (e.g. LiteLLM's sample_spec
+	// template, which holds placeholder strings in numeric fields) cannot fail
+	// the whole payload.
+	var rawEntries map[string]json.RawMessage
+	if err := json.Unmarshal(data, &rawEntries); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal pricing data: %w", err)
 	}
+	delete(rawEntries, "sample_spec")
+
+	pricingData := make(map[string]Entry, len(rawEntries))
+	skipped := 0
+	for key, raw := range rawEntries {
+		var entry Entry
+		if err := json.Unmarshal(raw, &entry); err != nil {
+			skipped++
+			if s.logger != nil {
+				s.logger.Debug("skipping unparsable pricing entry %q: %v", key, err)
+			}
+			continue
+		}
+		// Rows with no provider can never match a lookup key.
+		if entry.Provider == "" {
+			skipped++
+			continue
+		}
+		pricingData[key] = entry
+	}
+
 	if s.logger != nil {
-		s.logger.Debug("successfully downloaded and parsed %d pricing records", len(pricingData))
+		s.logger.Debug("successfully downloaded and parsed %d pricing records (%d skipped)", len(pricingData), skipped)
 	}
 
 	return pricingData, nil

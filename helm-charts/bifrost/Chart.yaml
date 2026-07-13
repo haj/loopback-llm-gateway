@@ -10,10 +10,10 @@ keywords:
   - llm
   - openai
   - anthropic
-home: https://github.com/haj/loopback-gateway
+home: https://github.com/haj/loopback-llm-gateway
 sources:
-  - https://github.com/haj/loopback-gateway
+  - https://github.com/haj/loopback-llm-gateway
   - https://github.com/maximhq/bifrost
 maintainers:
   - name: Loopback Gateway Maintainers
-    url: https://github.com/haj/loopback-gateway
+    url: https://github.com/haj/loopback-llm-gateway

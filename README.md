@@ -2,8 +2,8 @@
 
 **The open-source, self-hostable LLM gateway for European enterprises and the public sector.**
 
-[![License](https://img.shields.io/github/license/haj/loopback-gateway)](LICENSE)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/haj/loopback-gateway?filename=core%2Fgo.mod)](https://go.dev/dl/)
+[![License](https://img.shields.io/github/license/haj/loopback-llm-gateway)](LICENSE)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/haj/loopback-llm-gateway?filename=core%2Fgo.mod)](https://go.dev/dl/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 Loopback Gateway is a self-hosted AI gateway: one OpenAI-compatible endpoint in front of ~25
@@ -56,6 +56,11 @@ software. A BSI C5 control-mapping document and compliance-log mode are on the
 - **MCP support** — connect Model Context Protocol tool servers through the gateway
 - **Observability** — Prometheus metrics, OpenTelemetry plugin, request logs
 - **Plugin system** — semantic caching, telemetry, mocking, and custom plugins
+- **Offline model catalog** — pricing, context windows, and capability flags for **2,900+
+  models** (including the major open-weights families on Groq, Fireworks, Ollama, vLLM,
+  OpenRouter, and more), embedded from [LiteLLM's](https://github.com/BerriAI/litellm)
+  MIT-licensed catalog. Loaded from the binary by default — **no phone-home** — with
+  optional sync from any HTTP(S)/`file://` source in LiteLLM or datasheet format
 - **Embedded admin UI** — served by the same binary
 
 ### Compliance & security layer (added by this fork)
@@ -97,8 +102,8 @@ like upstream. Shipped and tested (per-feature detail in
 Requirements: Go 1.26+, Node 22 (see `.nvmrc`) — or just `nix develop` if you use Nix.
 
 ```bash
-git clone https://github.com/haj/loopback-gateway.git
-cd loopback-gateway
+git clone https://github.com/haj/loopback-llm-gateway.git
+cd loopback-llm-gateway
 make dev        # admin UI + API with hot reload, everything on http://localhost:8080
 ```
 

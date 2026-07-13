@@ -6,7 +6,7 @@ The Loopback Gateway maintainers take security issues seriously. We appreciate y
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
-Instead, please report them privately via **GitHub Security Advisories**: use [GitHub's private vulnerability reporting](https://github.com/haj/loopback-gateway/security/advisories/new) to submit a report directly through this repository.
+Instead, please report them privately via **GitHub Security Advisories**: use [GitHub's private vulnerability reporting](https://github.com/haj/loopback-llm-gateway/security/advisories/new) to submit a report directly through this repository.
 
 ### What to include
 

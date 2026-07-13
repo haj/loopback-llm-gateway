@@ -14,9 +14,16 @@ import (
 
 // Defaults for sync configuration and timeouts. Exposed so the composer can
 // fall back to these when the framework Config leaves fields nil.
+//
+// By default the catalog loads from the embedded LiteLLM snapshot and the
+// model-parameters sync is disabled, so an unconfigured gateway performs no
+// outbound catalog requests. Set pricing_url / model_parameters_url (e.g. to
+// the Upstream* URLs below) to sync from a remote datasheet instead.
 const (
-	DefaultURL                    = "https://getbifrost.ai/datasheet"
-	DefaultModelParametersURL     = "https://getbifrost.ai/datasheet/model-parameters"
+	DefaultURL                    = EmbeddedPricingURL
+	DefaultModelParametersURL     = "" // empty disables the model-parameters sync
+	UpstreamPricingURL            = "https://getbifrost.ai/datasheet"
+	UpstreamModelParametersURL    = "https://getbifrost.ai/datasheet/model-parameters"
 	DefaultSyncInterval           = 24 * time.Hour
 	DefaultPricingTimeout         = 45 * time.Second
 	DefaultModelParametersTimeout = 45 * time.Second
@@ -34,9 +41,9 @@ func (c Config) resolved() Config {
 	if c.URL == "" {
 		c.URL = DefaultURL
 	}
-	if c.ModelParametersURL == "" {
-		c.ModelParametersURL = DefaultModelParametersURL
-	}
+	// ModelParametersURL intentionally has no fallback: empty means the
+	// model-parameters sync is disabled (max_output_tokens still gets seeded
+	// from the pricing datasheet).
 	if c.SyncInterval <= 0 {
 		c.SyncInterval = DefaultSyncInterval
 	}
